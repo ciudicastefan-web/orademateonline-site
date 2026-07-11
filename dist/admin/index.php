@@ -30,12 +30,34 @@ $users = $pdo->query(
      FROM users u ORDER BY u.created_at DESC LIMIT 200'
 )->fetchAll();
 
+/* ── ore viitoare + produse ─────────────────────────────────── */
+$sessions = $pdo->query(
+    'SELECT s.*, (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked
+     FROM class_sessions s WHERE s.starts_at >= NOW() ORDER BY s.starts_at LIMIT 50'
+)->fetchAll();
+
+$products = $pdo->query('SELECT * FROM products ORDER BY created_at DESC LIMIT 100')->fetchAll();
+
+$months = [1=>'ian',2=>'feb',3=>'mar',4=>'apr',5=>'mai',6=>'iun',7=>'iul',8=>'aug',9=>'sep',10=>'oct',11=>'nov',12=>'dec'];
+function ro_dt(string $dt, array $months): string {
+    $t = strtotime($dt);
+    return date('j', $t) . ' ' . $months[(int) date('n', $t)] . date(' Y, H:i', $t);
+}
+
 /* ── mesaje flash ───────────────────────────────────────────── */
 $map = [
     'ok=blocat' => 'Contul a fost blocat.', 'ok=deblocat' => 'Contul a fost deblocat.',
     'ok=activat' => 'Contul a fost activat manual.', 'ok=retrimis' => 'Emailul de activare a fost retrimis.',
+    'ok=ora-creata' => 'Ora a fost creată — părinții cu copii pe clasa respectivă o văd deja în cont.',
+    'ok=produs-creat' => 'Produsul a fost adăugat.',
+    'ok=acces-acordat' => 'Accesul a fost acordat — apare la „Materialele mele” în contul utilizatorului.',
     'err=negasit' => 'Utilizatorul nu există.', 'err=autoblocare' => 'Nu îți poți bloca propriul cont.',
     'err=deja-activat' => 'Contul e deja activat.', 'err=actiune' => 'Acțiune necunoscută.',
+    'err=ora-invalida' => 'Verifică titlul, clasa și data orei (trebuie să fie în viitor).',
+    'err=ora-link' => 'Linkul de întâlnire nu pare un URL valid.',
+    'err=produs-titlu' => 'Titlul produsului e prea scurt.',
+    'err=produs-negasit' => 'Produsul selectat nu există.',
+    'err=acces-existent' => 'Utilizatorul are deja acces la acest produs.',
 ];
 $flash = null; $isErr = false;
 $qs = $_SERVER['QUERY_STRING'] ?? '';
@@ -147,9 +169,88 @@ function status_badge(array $u): string
     </div>
 
     <div class="panel">
+      <h2>🗓️ Ore programate (viitoare)</h2>
+      <?php if (!$sessions): ?><p class="muted">Nicio oră viitoare — creează prima mai jos.</p><?php endif; ?>
+      <?php foreach ($sessions as $s): ?>
+        <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
+          <div>
+            <strong><?= e($s['title']) ?></strong>
+            <span class="b b-pending"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
+            <div class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min
+              · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
+              <?= $s['meet_link'] ? ' · are link' : ' · fără link încă' ?></div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <h2 style="margin-top:18px">Creează o oră</h2>
+      <form method="post" action="/api/admin-session-save.php" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end">
+        <label style="grid-column:1/-1">Titlu (ex. „Fracții — recapitulare”)
+          <input type="text" name="title" required minlength="3" maxlength="160" />
+        </label>
+        <label>Clasa
+          <select name="grade" required>
+            <?php foreach ($grades as $i => $g): ?><option value="<?= $i ?>"><?= e($g) ?></option><?php endforeach; ?>
+          </select>
+        </label>
+        <label>Data <input type="date" name="date" required /></label>
+        <label>Ora <input type="time" name="time" required /></label>
+        <label>Durata (min) <input type="number" name="duration" value="60" min="15" max="240" /></label>
+        <label>Locuri <input type="number" name="capacity" value="8" min="1" max="30" /></label>
+        <label style="grid-column:1/-1">Link întâlnire (Zoom/Meet — opțional, îl văd doar cei înscriși)
+          <input type="url" name="meet_link" placeholder="https://..." />
+        </label>
+        <div><button type="submit">Creează ora</button></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>📚 Produse (materiale / cursuri)</h2>
+      <?php if (!$products): ?><p class="muted">Niciun produs încă.</p><?php endif; ?>
+      <?php foreach ($products as $p): ?>
+        <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
+          <div><strong><?= e($p['title']) ?></strong> <span class="b b-pending"><?= e($p['type']) ?></span>
+            <span class="muted"><?= number_format($p['price_cents'] / 100, 2, ',', '.') ?> lei
+              · fișier: <?= $p['file_name'] ? e((string) $p['file_name']) : '—' ?></span></div>
+        </div>
+      <?php endforeach; ?>
+
+      <div style="display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:16px">
+        <div>
+          <h2 style="font-size:1rem">Adaugă produs</h2>
+          <form method="post" action="/api/admin-product-save.php" style="display:grid;gap:10px">
+            <label>Titlu <input type="text" name="title" required minlength="3" maxlength="160" /></label>
+            <label>Tip
+              <select name="type"><option value="pdf">PDF (descărcabil)</option><option value="curs">Curs</option></select>
+            </label>
+            <label>Fișier (nume din folderul privat „materiale”)
+              <input type="text" name="file_name" placeholder="ex. culegere-cls5.pdf" />
+            </label>
+            <label>Preț (lei) <input type="text" name="price_lei" value="0" /></label>
+            <button type="submit">Adaugă</button>
+          </form>
+          <p class="muted" style="margin-top:8px">Fișierele se urcă prin File Manager în <code>/home/olsibrej/materiale/</code>.</p>
+        </div>
+        <div>
+          <h2 style="font-size:1rem">Acordă acces manual</h2>
+          <p class="muted" style="margin-bottom:8px">Pentru plăți prin transfer, bonusuri sau teste — produsul apare instant în contul utilizatorului.</p>
+          <form method="post" action="/api/admin-grant.php" style="display:grid;gap:10px">
+            <label>Emailul utilizatorului <input type="email" name="email" required /></label>
+            <label>Produsul
+              <select name="product_id" required>
+                <?php foreach ($products as $p): ?><option value="<?= (int) $p['id'] ?>"><?= e($p['title']) ?></option><?php endforeach; ?>
+              </select>
+            </label>
+            <button type="submit">Acordă accesul</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
       <h2>Vânzări și comenzi</h2>
-      <p class="soon">🛒 Secțiunea se activează odată cu plățile (Stripe + facturare) — aici vor apărea
-        comenzile, încasările pe produse și statisticile de vânzare.</p>
+      <p class="soon">🛒 Plățile online cu cardul se activează odată cu Stripe + facturarea (după PFA) —
+        până atunci, accesele acordate manual de mai sus țin loc de vânzări.</p>
     </div>
 
     <div class="panel">

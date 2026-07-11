@@ -42,6 +42,54 @@ $ddl = [
       cnt INT UNSIGNED NOT NULL DEFAULT 1,
       win_start DATETIME NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+    -- v3: produse (PDF-uri, cursuri) și achiziții
+    "CREATE TABLE IF NOT EXISTS products (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      type VARCHAR(20) NOT NULL DEFAULT 'pdf',
+      title VARCHAR(160) NOT NULL,
+      description TEXT NULL,
+      file_name VARCHAR(200) NULL,
+      price_cents INT UNSIGNED NOT NULL DEFAULT 0,
+      active TINYINT(1) NOT NULL DEFAULT 1,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+    "CREATE TABLE IF NOT EXISTS purchases (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      user_id INT UNSIGNED NOT NULL,
+      product_id INT UNSIGNED NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'paid',
+      download_count INT UNSIGNED NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_purch_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_purch_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+    -- v3: orele (sesiunile live) și programările copiilor la ele
+    "CREATE TABLE IF NOT EXISTS class_sessions (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(160) NOT NULL,
+      grade TINYINT UNSIGNED NOT NULL,
+      starts_at DATETIME NOT NULL,
+      duration_min SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+      capacity TINYINT UNSIGNED NOT NULL DEFAULT 8,
+      meet_link VARCHAR(300) NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+    "CREATE TABLE IF NOT EXISTS bookings (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      session_id INT UNSIGNED NOT NULL,
+      child_id INT UNSIGNED NOT NULL,
+      user_id INT UNSIGNED NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'booked',
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_session_child (session_id, child_id),
+      CONSTRAINT fk_book_session FOREIGN KEY (session_id) REFERENCES class_sessions(id) ON DELETE CASCADE,
+      CONSTRAINT fk_book_child FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
+      CONSTRAINT fk_book_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 ];
 
 try {
@@ -58,8 +106,14 @@ try {
         $pdo->query('ALTER TABLE users ADD COLUMN blocked_at DATETIME NULL');
     }
 
+    // folderul privat pentru fișierele materialelor (în afara public_html)
+    $mat = dirname(__DIR__, 2) . '/materiale';
+    if (!is_dir($mat)) {
+        @mkdir($mat, 0700, true);
+    }
+
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK (v2). Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v3). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());
