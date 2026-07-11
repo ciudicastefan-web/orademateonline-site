@@ -70,15 +70,15 @@ function ro_dt(string $dt, array $months): string {
 }
 
 $map = [
-    'ok=copil' => 'Profilul copilului a fost adăugat.', 'ok=copil-sters' => 'Profilul a fost șters.',
+    'ok=copil' => 'Profilul elevului a fost adăugat.', 'ok=copil-sters' => 'Profilul a fost șters.',
     'ok=profil' => 'Datele tale au fost actualizate.', 'ok=programat' => 'Programare făcută! Linkul orei apare mai jos, la „Programările viitoare”.',
     'ok=anulat' => 'Programarea a fost anulată.',
-    'err=copil-nume' => 'Prenumele copilului trebuie să aibă între 2 și 80 de caractere.',
-    'err=copil-clasa' => 'Alege clasa copilului.', 'err=copil-limita' => 'Ai atins numărul maxim de profiluri (6).',
+    'err=copil-nume' => 'Prenumele elevului trebuie să aibă între 2 și 80 de caractere.',
+    'err=copil-clasa' => 'Alege clasa elevului.', 'err=copil-limita' => 'Ai atins numărul maxim de profiluri (6).',
     'err=nume' => 'Numele trebuie să aibă între 2 și 120 de caractere.',
     'err=programare' => 'Programarea nu a putut fi făcută. Încearcă din nou.',
-    'err=programare-clasa' => 'Ora aleasă e pentru altă clasă decât a copilului.',
-    'err=programare-dubla' => 'Copilul e deja înscris la această oră.',
+    'err=programare-clasa' => 'Ora aleasă e pentru altă clasă decât a elevului.',
+    'err=programare-dubla' => 'Elevul e deja înscris la această oră.',
     'err=programare-plina' => 'Ne pare rău, ora s-a umplut între timp.',
     'err=anulare-tarziu' => 'Anularea se poate face cel târziu cu 24 de ore înainte de oră.',
     'err=descarcare' => 'Descărcarea nu a funcționat. Scrie-ne dacă persistă.',
@@ -258,7 +258,7 @@ foreach ($map as $k => $m) {
     <section class="panel" style="margin-top:20px">
       <h2>🗓️ Programează o oră</h2>
       <?php if (!$children): ?>
-        <p class="empty">Adaugă întâi profilul copilului — orele se afișează pe clasa lui.</p>
+        <p class="empty">Adaugă întâi profilul elevului — orele se afișează pe clasa lui.</p>
       <?php endif; ?>
       <?php foreach ($children as $c): ?>
         <h3><?= e($c['first_name']) ?> · <?= e($grades[(int) $c['grade']] ?? '') ?></h3>
@@ -309,7 +309,7 @@ foreach ($map as $k => $m) {
       <section class="panel">
         <h2>📖 Istoric ore</h2>
         <?php if (!$history): ?>
-          <p class="empty">Orele la care a participat copilul vor apărea aici, după ce trec.</p>
+          <p class="empty">Orele la care a participat elevul vor apărea aici, după ce trec.</p>
         <?php endif; ?>
         <?php foreach ($history as $h): ?>
           <div class="row">
@@ -328,7 +328,7 @@ foreach ($map as $k => $m) {
     <section class="panel danger" style="margin-top:20px">
       <h2>Ștergerea contului</h2>
       <p class="muted" style="margin-bottom:12px">
-        Ștergerea e definitivă: dispar profilurile copiilor, programările și accesul la materiale.
+        Ștergerea e definitivă: dispar profilurile elevilor, programările și accesul la materiale.
         Pentru confirmare, introdu parola contului.
       </p>
       <form method="post" action="/api/account-delete.php"
