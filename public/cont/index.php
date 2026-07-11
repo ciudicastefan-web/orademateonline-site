@@ -84,6 +84,13 @@ $map = [
     'err=descarcare' => 'Descărcarea nu a funcționat. Scrie-ne dacă persistă.',
     'err=descarcare-limita' => 'Ai atins limita de 5 descărcări pentru acest material. Scrie-ne dacă ai nevoie de el din nou.',
     'err=stergere-parola' => 'Parola introdusă nu e corectă — contul NU a fost șters.',
+    'ok=email-trimis' => 'Ți-am trimis un link de confirmare pe NOUA adresă — emailul se schimbă după click (verifică și spamul).',
+    'ok=email-schimbat' => 'Adresa de email a fost schimbată cu succes.',
+    'err=email-nou' => 'Noua adresă de email nu pare validă.',
+    'err=email-acelasi' => 'Noua adresă e identică cu cea actuală.',
+    'err=email-parola' => 'Parola introdusă nu e corectă — emailul NU a fost schimbat.',
+    'err=email-ocupat' => 'Există deja un cont cu această adresă de email.',
+    'err=email-token' => 'Linkul de confirmare e invalid sau expirat — cere schimbarea din nou.',
 ];
 $flash = null; $isErr = false;
 $qs = $_SERVER['QUERY_STRING'] ?? '';
@@ -193,12 +200,29 @@ foreach ($map as $k => $m) {
     <div class="grid2">
       <section class="panel">
         <h2>Datele tale</h2>
-        <p class="muted" style="margin-bottom:14px">Email: <strong><?= e($u['email']) ?></strong> ✓ verificat</p>
+        <p class="muted" style="margin-bottom:14px">
+          Email: <strong><?= e($u['email']) ?></strong> ✓ verificat
+          <?php if (array_key_exists('new_email', $u) && $u['new_email'] !== null): ?>
+            <br /><span style="color:var(--pen)">→ schimbare în așteptare către <?= e((string) $u['new_email']) ?> (confirmă din emailul primit)</span>
+          <?php endif; ?>
+        </p>
         <form method="post" action="/api/profile.php">
           <label>Numele afișat
             <input type="text" name="full_name" required minlength="2" maxlength="120" value="<?= e($u['full_name']) ?>" />
           </label>
           <button type="submit">Salvează</button>
+        </form>
+
+        <h3 style="margin-top:20px;font-size:1rem">Schimbă adresa de email</h3>
+        <p class="muted" style="margin:6px 0 12px">Primești un link de confirmare pe adresa nouă; cea veche rămâne activă până confirmi.</p>
+        <form method="post" action="/api/email-change.php">
+          <label>Noua adresă de email
+            <input type="email" name="new_email" required maxlength="190" autocomplete="email" />
+          </label>
+          <label>Parola contului <span class="muted">(pentru siguranță)</span>
+            <input type="password" name="password" required autocomplete="current-password" />
+          </label>
+          <button type="submit">Trimite confirmarea</button>
         </form>
       </section>
 

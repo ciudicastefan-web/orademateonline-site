@@ -120,6 +120,17 @@ try {
         $pdo->query('ALTER TABLE bookings ADD COLUMN attended TINYINT(1) NULL');
     }
 
+    // v5: schimbarea emailului (adresa nouă așteaptă confirmarea prin link)
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'
+                          AND COLUMN_NAME = 'new_email'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE users
+                     ADD COLUMN new_email VARCHAR(190) NULL,
+                     ADD COLUMN new_email_token_hash CHAR(64) NULL,
+                     ADD COLUMN new_email_expires_at DATETIME NULL');
+    }
+
     // folderul privat pentru fișierele materialelor (în afara public_html)
     $mat = dirname(__DIR__, 2) . '/materiale';
     if (!is_dir($mat)) {
@@ -127,7 +138,7 @@ try {
     }
 
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK (v4). Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v5). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());
