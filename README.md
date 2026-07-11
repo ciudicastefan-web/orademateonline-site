@@ -1,11 +1,18 @@
-# Ora de Mate Online — cod deployabil
+# orademateonline.ro — site
 
-Tema child WordPress (`teomate-child/`, părinte: Kadence) pentru orademateonline.ro.
+Site static **Astro** pentru Ora de Mate Online (meditații de matematică, grupe mici).
 
-**Fluxul de deploy:** modificări locale → commit → push pe GitHub → cPanel Git™
-Version Control trage modificările (Update from Remote) → `.cpanel.yml` copiază
-tema în `public_html/wp-content/themes/teomate-child`.
+## Fluxul de lucru
 
-Acest repo conține DOAR cod care ajunge pe server — fără documente de business,
-fără secrete, fără date de clienți. Documentația proiectului trăiește separat,
-în repo-ul privat local `D:\TEO Mate`.
+1. Modificări locale în `src/` → `npm run dev` pentru preview live.
+2. `npm run build` → generează `dist/` (care SE versionează — serverul nu are Node).
+3. `git push` → pe server, cPanel Git™ Version Control trage modificările,
+   iar `.cpanel.yml` copiază `dist/` în `public_html`.
+
+## Structură
+
+- `src/pages/` — paginile site-ului (`.astro`)
+- `public/` — fișiere statice servite ca atare (favicon etc.)
+- Fonturile sunt găzduite local prin `@fontsource` (GDPR: zero cereri către terți).
+
+Acest repo conține DOAR cod. Documentele proiectului trăiesc în repo-ul privat local.

@@ -1,0 +1,8 @@
+# dependențe (se reinstalează cu npm install)
+node_modules/
+
+# fișiere Astro generate local
+.astro/
+
+# NOTĂ: dist/ SE VERSIONEAZĂ intenționat — serverul Hostico nu are Node,
+# așa că build-ul se face local și dist/ ajunge pe server prin git deploy.

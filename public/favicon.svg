@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <pattern id="g" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0v16" fill="none" stroke="#2b4a8b" stroke-opacity=".22" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#fbf7ef"/>
+  <rect width="64" height="64" rx="12" fill="url(#g)"/>
+  <text x="32" y="43" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-weight="600" fill="#1d2e52">π</text>
+  <ellipse cx="32" cy="32" rx="24" ry="17" fill="none" stroke="#e4572e" stroke-width="2.5" transform="rotate(-8 32 32)"/>
+</svg>
