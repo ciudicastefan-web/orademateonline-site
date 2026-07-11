@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/olsibrej/public_html/wp-content/themes/teomate-child
+    - export DEPLOYPATH=$HOME/public_html/wp-content/themes/teomate-child
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -R teomate-child/* $DEPLOYPATH
