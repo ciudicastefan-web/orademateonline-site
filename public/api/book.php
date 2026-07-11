@@ -15,23 +15,25 @@ if (!$u) {
 
 $sessionId = (int) ($_POST['session_id'] ?? 0);
 $childId = (int) ($_POST['child_id'] ?? 0);
+// înscrierea se poate face și din calendarul paginii Cursuri — revii acolo
+$back = ($_POST['back'] ?? '') === '/cursuri' ? '/cursuri' : '/cont/';
 $pdo = db();
 
 $st = $pdo->prepare('SELECT * FROM children WHERE id = ? AND user_id = ?');
 $st->execute([$childId, $u['id']]);
 $child = $st->fetch();
 if (!$child) {
-    redirect('/cont/?err=programare');
+    redirect($back . '?err=programare');
 }
 
 $st = $pdo->prepare('SELECT * FROM class_sessions WHERE id = ?');
 $st->execute([$sessionId]);
 $sess = $st->fetch();
 if (!$sess || strtotime((string) $sess['starts_at']) < time()) {
-    redirect('/cont/?err=programare');
+    redirect($back . '?err=programare');
 }
 if ((int) $sess['grade'] !== (int) $child['grade']) {
-    redirect('/cont/?err=programare-clasa');
+    redirect($back . '?err=programare-clasa');
 }
 
 // dublură? (inclusiv anulată — o reactivăm)
@@ -39,14 +41,14 @@ $st = $pdo->prepare('SELECT * FROM bookings WHERE session_id = ? AND child_id = 
 $st->execute([$sessionId, $childId]);
 $existing = $st->fetch();
 if ($existing && $existing['status'] === 'booked') {
-    redirect('/cont/?err=programare-dubla');
+    redirect($back . '?err=programare-dubla');
 }
 
 // locuri libere?
 $st = $pdo->prepare('SELECT COUNT(*) FROM bookings WHERE session_id = ? AND status = "booked"');
 $st->execute([$sessionId]);
 if ((int) $st->fetchColumn() >= (int) $sess['capacity']) {
-    redirect('/cont/?err=programare-plina');
+    redirect($back . '?err=programare-plina');
 }
 
 if ($existing) {
@@ -57,4 +59,4 @@ if ($existing) {
         ->execute([$sessionId, $childId, $u['id']]);
 }
 
-redirect('/cont/?ok=programat');
+redirect($back . '?ok=programat');

@@ -57,7 +57,45 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <aside class="soon reveal" style="--i: 7">
+    <section class="programa reveal" style="--i: 7" aria-label="Ce lucrăm la ore">
+      <h2 class="sec-h">Ce lucrăm la ore</h2>
+      <p class="sec-sub">
+        Ariile mari din programa școlară pe care le acoperim — capitolele exacte se
+        aleg după clasa grupei și, la nevoie, după testul de evaluare.
+      </p>
+      <div class="prog-grid">
+        <div class="prog-col">
+          <h3>Gimnaziu (V–VIII)</h3>
+          <ul>
+            <li><strong>Numere și calcule</strong> — naturale, întregi, raționale · puteri și radicali · procente</li>
+            <li><strong>Algebră</strong> — calcul algebric · ecuații și inecuații · funcții</li>
+            <li><strong>Geometrie plană</strong> — unghiuri, triunghiuri, patrulatere · arii · teorema lui Pitagora · asemănare</li>
+            <li><strong>Geometrie în spațiu</strong> — corpuri geometrice · arii și volume</li>
+            <li><strong>Organizarea datelor</strong> — medii, grafice, probabilități simple</li>
+          </ul>
+        </div>
+        <div class="prog-col">
+          <h3>Liceu (IX–XII)</h3>
+          <ul>
+            <li><strong>Algebră</strong> — mulțimi și funcții · progresii · ecuații · matrice și determinanți</li>
+            <li><strong>Analiză matematică</strong> — limite · derivate · integrale</li>
+            <li><strong>Trigonometrie și geometrie</strong> — vectori · aplicații în plan</li>
+            <li><strong>Combinatorică și probabilități</strong></li>
+            <li><strong>Pregătire Bacalaureat</strong> — pe structura subiectelor, pe profilul fiecăruia</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="cal-sec reveal" style="--i: 8" aria-label="Calendarul orelor">
+      <h2 class="sec-h">📅 Calendarul orelor</h2>
+      <div id="cal-flash" class="cal-flash" hidden></div>
+      <div id="cal-root">
+        <p class="cal-note">Se încarcă…</p>
+      </div>
+    </section>
+
+    <aside class="soon reveal" style="--i: 9">
       🗓️ <strong>Grupele concrete</strong> — pe ce clase, în ce zile, la ce preț —
       se anunță la deschiderea înscrierilor, direct în contul tău.
       <a href="/inregistrare" class="soon-cta">Creează-ți contul</a> ca să le prinzi pe primele.
@@ -67,6 +105,181 @@ import Layout from '../layouts/Layout.astro';
     </aside>
   </main>
 </Layout>
+
+<script>
+  /* ── Calendarul orelor: alimentat din aceleași ore pe care adminul le creează.
+        Logat → grila pe zile cu locuri libere + înscriere direct de aici.
+        Nelogat → invitație la autentificare (cu revenire în această pagină).
+        Construit exclusiv cu DOM API + textContent — sigur prin construcție. ── */
+  const GRADES = ['Pregătitoare','Clasa I','Clasa a II-a','Clasa a III-a','Clasa a IV-a','Clasa a V-a',
+    'Clasa a VI-a','Clasa a VII-a','Clasa a VIII-a','Clasa a IX-a','Clasa a X-a','Clasa a XI-a','Clasa a XII-a'];
+  const DAYS = ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+  const MONTHS = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
+
+  const root = document.getElementById('cal-root')!;
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function clearRoot(): void {
+    while (root.firstChild) root.removeChild(root.firstChild);
+  }
+
+  /* mesajele după înscriere (venim înapoi aici cu ?ok= / ?err=) */
+  const FLASH: Record<string, [string, boolean]> = {
+    'ok=programat': ['Programare făcută! Linkul orei apare pe cardul ei și în contul tău.', false],
+    'err=programare-plina': ['Ne pare rău, ora s-a umplut între timp.', true],
+    'err=programare-dubla': ['Elevul e deja înscris la această oră.', true],
+    'err=programare-clasa': ['Ora aleasă e pentru altă clasă decât a elevului.', true],
+    'err=programare': ['Programarea nu a putut fi făcută. Încearcă din nou.', true],
+  };
+  const q = window.location.search.replace('?', '');
+  const flashEl = document.getElementById('cal-flash')!;
+  for (const key in FLASH) {
+    if (q.includes(key)) {
+      flashEl.textContent = FLASH[key][0];
+      flashEl.classList.toggle('is-err', FLASH[key][1]);
+      flashEl.hidden = false;
+      history.replaceState(null, '', window.location.pathname);
+      flashEl.scrollIntoView({ block: 'center' });
+      break;
+    }
+  }
+
+  function showAnonCta(): void {
+    clearRoot();
+    const box = el('div', 'cal-cta');
+    box.append('Calendarul orelor — cu zilele, locurile libere și înscrierea la un click — e vizibil în cont. ');
+    const a1 = el('a', '', 'Autentifică-te');
+    a1.setAttribute('href', '/autentificare?next=%2Fcursuri');
+    const a2 = el('a', '', 'creează-ți contul gratuit');
+    a2.setAttribute('href', '/inregistrare?next=%2Fcursuri');
+    box.append(a1, ' sau ', a2, '.');
+    root.append(box);
+  }
+
+  function noteWithAccountLink(prefix: string, suffix: string): HTMLElement {
+    const p = el('p', 'cal-note');
+    const a = el('a', '', 'contul tău');
+    a.setAttribute('href', '/cont/');
+    p.append(prefix, a, suffix);
+    return p;
+  }
+
+  fetch('/api/sessions.php', { credentials: 'same-origin' })
+    .then((r) => (r.status === 401 ? { auth: false } : r.json()))
+    .then((data: any) => {
+      if (!data || data.auth === false) {
+        showAnonCta();
+        return;
+      }
+      render(data);
+    })
+    .catch(() => {
+      clearRoot();
+      root.append(el('p', 'cal-note', 'Calendarul nu s-a putut încărca — reîncearcă mai târziu.'));
+    });
+
+  function render(data: { children: any[]; sessions: any[] }): void {
+    const { children, sessions } = data;
+    clearRoot();
+
+    if (!sessions.length) {
+      root.append(noteWithAccountLink(
+        '📭 Nicio oră programată în următoarele 3 săptămâni — profesoara publică orele aici. Între timp, pregătește ',
+        ' (elevul cu prenume + clasă).'
+      ));
+      return;
+    }
+
+    if (!children.length) {
+      root.append(noteWithAccountLink('💡 Adaugă întâi elevul în ', ' (prenume + clasă) ca să te poți înscrie la ore.'));
+    }
+
+    const byDay = new Map<string, any[]>();
+    for (const s of sessions) {
+      const key = String(s.starts_at).slice(0, 10);
+      if (!byDay.has(key)) byDay.set(key, []);
+      byDay.get(key)!.push(s);
+    }
+
+    const strip = el('div', 'cal-strip');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(today.getTime() + i * 86400000);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const daySessions = byDay.get(key) || [];
+      const isToday = i === 0;
+
+      const col = el('div', 'cal-day' + (isToday ? ' today' : ''));
+      const head = el('div', 'cal-day-h', DAYS[d.getDay()]);
+      head.append(el('span', '', `${d.getDate()} ${MONTHS[d.getMonth()]}${isToday ? ' · AZI' : ''}`));
+      col.append(head);
+
+      if (!daySessions.length) col.append(el('div', 'cal-empty', '—'));
+
+      for (const s of daySessions) {
+        const full = s.free <= 0;
+        const enrolled = s.enrolled_children.length > 0;
+        const matching = children.filter((c: any) => c.grade === s.grade);
+
+        const card = el('div', 'cal-card' + (enrolled ? ' mine' : ''));
+        card.append(el('div', 'cal-time', `${String(s.starts_at).slice(11, 16)} · ${s.duration} min`));
+        card.append(el('div', 'cal-title', String(s.title)));
+
+        const meta = el('div', 'cal-meta');
+        meta.append(el('span', 'cal-pill grade', GRADES[s.grade] ?? ''));
+        if (enrolled) meta.append(el('span', 'cal-pill ok', 'înscris ✓'));
+        else if (full) meta.append(el('span', 'cal-pill full', 'complet'));
+        else meta.append(el('span', 'cal-pill', `${s.free} ${s.free === 1 ? 'loc liber' : 'locuri libere'}`));
+        card.append(meta);
+
+        if (enrolled && s.meet_link) {
+          const join = el('a', 'cal-join', 'Intră la oră →');
+          join.setAttribute('href', String(s.meet_link));
+          join.setAttribute('rel', 'noopener');
+          card.append(join);
+        }
+
+        if (!enrolled && !full && matching.length > 0) {
+          const form = el('form', 'cal-enroll');
+          form.setAttribute('method', 'post');
+          form.setAttribute('action', '/api/book.php');
+          const h1 = el('input'); h1.type = 'hidden'; h1.name = 'session_id'; h1.value = String(s.id);
+          const h2 = el('input'); h2.type = 'hidden'; h2.name = 'back'; h2.value = '/cursuri';
+          form.append(h1, h2);
+          if (matching.length === 1) {
+            const h3 = el('input'); h3.type = 'hidden'; h3.name = 'child_id'; h3.value = String(matching[0].id);
+            form.append(h3, el('button', '', `Înscrie-l pe ${matching[0].name}`));
+          } else {
+            const sel = el('select'); sel.name = 'child_id';
+            for (const c of matching) {
+              const opt = el('option', '', String(c.name));
+              opt.value = String(c.id);
+              sel.append(opt);
+            }
+            form.append(sel, el('button', '', 'Înscrie'));
+          }
+          card.append(form);
+        }
+
+        if (!enrolled && !full && matching.length === 0 && children.length > 0) {
+          card.append(el('div', 'cal-hint', 'pentru altă clasă'));
+        }
+
+        col.append(card);
+      }
+      strip.append(col);
+    }
+    root.append(strip);
+  }
+</script>
 
 <style>
   .kicker {
@@ -197,5 +410,252 @@ import Layout from '../layouts/Layout.astro';
   .panel-box .hint a {
     color: var(--pen);
     font-weight: 700;
+  }
+
+  /* ── Programa ── */
+  .sec-h {
+    margin-top: clamp(40px, 6vh, 60px);
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+  }
+
+  .sec-sub {
+    margin-top: 8px;
+    max-width: 62ch;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  .prog-grid {
+    margin-top: 20px;
+    display: grid;
+    gap: 18px;
+  }
+
+  @media (min-width: 760px) {
+    .prog-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .prog-col {
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+  }
+
+  .prog-col h3 {
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.12rem;
+    color: var(--pen);
+  }
+
+  .prog-col ul {
+    margin: 12px 0 0 20px;
+    display: grid;
+    gap: 10px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    font-size: 0.97rem;
+  }
+
+  .prog-col strong { color: var(--ink); }
+
+  /* ── Calendarul orelor ── */
+  .cal-flash {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    background: rgba(46, 139, 87, 0.12);
+    border: 1.5px solid rgba(46, 139, 87, 0.4);
+    color: #1e5c38;
+  }
+
+  .cal-flash.is-err {
+    background: rgba(228, 87, 46, 0.08);
+    border-color: rgba(228, 87, 46, 0.4);
+    color: #9c3415;
+  }
+
+  #cal-root { margin-top: 16px; }
+
+  .cal-sec :global(.cal-note) {
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .cal-sec :global(.cal-note a),
+  .cal-sec :global(.cal-cta a) {
+    color: var(--pen);
+    font-weight: 700;
+  }
+
+  .cal-sec :global(.cal-cta) {
+    padding: 18px 22px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(43, 74, 139, 0.35);
+    background: rgba(43, 74, 139, 0.04);
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* banda cu zile: derulabilă orizontal, ca un orar */
+  .cal-sec :global(.cal-strip) {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(168px, 1fr);
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cal-sec :global(.cal-day) {
+    scroll-snap-align: start;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+  }
+
+  .cal-sec :global(.cal-day.today) {
+    border-color: rgba(228, 87, 46, 0.55);
+    box-shadow: 0 3px 16px rgba(228, 87, 46, 0.1);
+  }
+
+  .cal-sec :global(.cal-day-h) {
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cal-sec :global(.cal-day-h span) {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+
+  .cal-sec :global(.cal-day.today .cal-day-h span) {
+    color: var(--pen);
+    font-weight: 700;
+  }
+
+  .cal-sec :global(.cal-empty) {
+    color: rgba(81, 97, 138, 0.4);
+    text-align: center;
+    margin: auto 0;
+  }
+
+  .cal-sec :global(.cal-card) {
+    border: 1px solid rgba(43, 74, 139, 0.18);
+    border-radius: 10px;
+    padding: 10px;
+    display: grid;
+    gap: 6px;
+    background: rgba(43, 74, 139, 0.03);
+  }
+
+  .cal-sec :global(.cal-card.mine) {
+    border-color: rgba(46, 139, 87, 0.5);
+    background: rgba(46, 139, 87, 0.06);
+  }
+
+  .cal-sec :global(.cal-time) {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--pen);
+  }
+
+  .cal-sec :global(.cal-card.mine .cal-time) { color: #1e5c38; }
+
+  .cal-sec :global(.cal-title) {
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .cal-sec :global(.cal-meta) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .cal-sec :global(.cal-pill) {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(43, 74, 139, 0.1);
+    color: var(--ink-soft);
+  }
+
+  .cal-sec :global(.cal-pill.grade) {
+    background: rgba(228, 87, 46, 0.1);
+    color: #9c3415;
+  }
+
+  .cal-sec :global(.cal-pill.ok) {
+    background: rgba(46, 139, 87, 0.15);
+    color: #1e5c38;
+  }
+
+  .cal-sec :global(.cal-pill.full) {
+    background: rgba(29, 46, 82, 0.12);
+    color: var(--ink);
+  }
+
+  .cal-sec :global(.cal-join) {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1e5c38;
+  }
+
+  .cal-sec :global(.cal-enroll) {
+    display: grid;
+    gap: 6px;
+  }
+
+  .cal-sec :global(.cal-enroll select) {
+    font: inherit;
+    font-size: 0.86rem;
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(43, 74, 139, 0.3);
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .cal-sec :global(.cal-enroll button) {
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--pen);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .cal-sec :global(.cal-enroll button:hover) { background: var(--ink); }
+
+  .cal-sec :global(.cal-hint) {
+    font-size: 0.78rem;
+    color: rgba(81, 97, 138, 0.7);
+    font-style: italic;
   }
 </style>
