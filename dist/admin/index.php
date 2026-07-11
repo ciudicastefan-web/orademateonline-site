@@ -41,6 +41,38 @@ $pastSessions = $pdo->query(
      FROM class_sessions s WHERE s.starts_at < NOW() ORDER BY s.starts_at DESC LIMIT 10'
 )->fetchAll();
 
+/* ── calendarul admin: grupare pe zile + detecția suprapunerilor ─
+   Un singur profesor → două ore care se intersectează în timp sunt un
+   conflict, indiferent de clasă. $sessions e sortat crescător, deci
+   comparăm fiecare oră doar cu următoarele până când una începe după
+   ce s-a terminat cea curentă. */
+$overlap = [];
+$nSess = count($sessions);
+for ($i = 0; $i < $nSess; $i++) {
+    $aStart = strtotime((string) $sessions[$i]['starts_at']);
+    $aEnd = $aStart + 60 * (int) $sessions[$i]['duration_min'];
+    for ($j = $i + 1; $j < $nSess; $j++) {
+        if (strtotime((string) $sessions[$j]['starts_at']) >= $aEnd) {
+            break;
+        }
+        $overlap[(int) $sessions[$i]['id']] = true;
+        $overlap[(int) $sessions[$j]['id']] = true;
+    }
+}
+
+$byDay = [];
+foreach ($sessions as $s) {
+    $byDay[substr((string) $s['starts_at'], 0, 10)][] = $s;
+}
+$dayNames = ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+$todayTs = strtotime('today');
+$stripEnd = strtotime('+14 days', $todayTs);
+// orele de după fereastra de 14 zile rămân într-o listă separată, sub calendar
+$laterSessions = array_values(array_filter(
+    $sessions,
+    static fn ($s) => strtotime((string) $s['starts_at']) >= $stripEnd
+));
+
 $products = $pdo->query('SELECT * FROM products ORDER BY created_at DESC LIMIT 100')->fetchAll();
 
 $months = [1=>'ian',2=>'feb',3=>'mar',4=>'apr',5=>'mai',6=>'iun',7=>'iul',8=>'aug',9=>'sep',10=>'oct',11=>'nov',12=>'dec'];
@@ -129,6 +161,25 @@ function status_badge(array $u): string
     .acts button.warn:hover{background:rgba(228,87,46,.08)}
     .muted{color:var(--ink-soft);font-size:.85rem}
     .soon{margin-top:8px;padding:14px 16px;border-radius:10px;border:1.5px dashed rgba(228,87,46,.5);background:rgba(228,87,46,.05);color:var(--ink-soft);font-size:.92rem}
+    .cal-strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:8px;overflow-x:auto;padding-bottom:10px}
+    .cal-day{background:rgba(43,74,139,.03);border:1px solid rgba(43,74,139,.14);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:96px}
+    .cal-day.today{border-color:rgba(228,87,46,.55);background:rgba(228,87,46,.04)}
+    .cal-day-h{font-weight:700;font-size:.82rem}
+    .cal-day-h span{display:block;font-weight:400;font-size:.76rem;color:var(--ink-soft)}
+    .cal-day.today .cal-day-h span{color:var(--pen);font-weight:700}
+    .cal-empty{color:rgba(81,97,138,.35);text-align:center;margin:auto 0;font-size:.9rem}
+    .cal-card{display:block;border:1px solid rgba(43,74,139,.2);border-radius:8px;padding:8px;background:#fff;text-decoration:none;color:var(--ink)}
+    .cal-card:hover{border-color:var(--pen);box-shadow:0 2px 8px rgba(228,87,46,.15)}
+    .cal-card.clash{border:2px solid #c62828;background:rgba(198,40,40,.05)}
+    .cal-time{font-weight:700;font-size:.82rem;color:var(--pen)}
+    .cal-title{font-size:.86rem;font-weight:700;line-height:1.3;margin-top:2px}
+    .cal-meta{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+    .cal-pill{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(43,74,139,.1);color:var(--ink-soft)}
+    .cal-pill.grade{background:rgba(228,87,46,.1);color:#9c3415}
+    .cal-pill.nolink{background:rgba(43,74,139,.08);font-style:italic}
+    .cal-pill.clash{background:#c62828;color:#fff}
+    .cal-pill.full{background:rgba(29,46,82,.12);color:var(--ink)}
+    .clash-note{margin-bottom:10px;padding:10px 14px;border-radius:8px;background:rgba(198,40,40,.08);border:1.5px solid rgba(198,40,40,.4);color:#8e1c1c;font-weight:700;font-size:.9rem}
     footer{padding:20px;font-size:.85rem;color:var(--ink-soft)}
     @media(max-width:760px){ .hide-sm{display:none} }
   </style>
@@ -176,20 +227,54 @@ function status_badge(array $u): string
     </div>
 
     <div class="panel">
-      <h2>🗓️ Ore programate (viitoare)</h2>
-      <?php if (!$sessions): ?><p class="muted">Nicio oră viitoare — creează prima mai jos.</p><?php endif; ?>
-      <?php foreach ($sessions as $s): ?>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
-          <div>
-            <strong><?= e($s['title']) ?></strong>
-            <span class="b b-pending"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
-            <div class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min
-              · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
-              <?= $s['meet_link'] ? ' · are link' : ' · fără link încă' ?></div>
+      <h2>🗓️ Calendarul orelor (următoarele 14 zile)</h2>
+      <?php if (!$sessions): ?><p class="muted">Nicio oră viitoare — creează prima mai jos.</p><?php else: ?>
+        <?php if ($overlap): ?>
+          <div class="clash-note">⚠ Atenție: ai ore care se suprapun în timp — sunt marcate cu roșu mai jos.</div>
+        <?php endif; ?>
+        <div class="cal-strip">
+          <?php for ($i = 0; $i < 14; $i++):
+            $dayTs = strtotime('+' . $i . ' day', $todayTs);
+            $daySessions = $byDay[date('Y-m-d', $dayTs)] ?? [];
+          ?>
+          <div class="cal-day<?= $i === 0 ? ' today' : '' ?>">
+            <div class="cal-day-h"><?= $dayNames[(int) date('w', $dayTs)] ?>
+              <span><?= date('j', $dayTs) . ' ' . $months[(int) date('n', $dayTs)] ?><?= $i === 0 ? ' · AZI' : '' ?></span>
+            </div>
+            <?php if (!$daySessions): ?><div class="cal-empty">—</div><?php endif; ?>
+            <?php foreach ($daySessions as $s): $clash = isset($overlap[(int) $s['id']]); ?>
+            <a class="cal-card<?= $clash ? ' clash' : '' ?>" href="/admin/ora.php?id=<?= (int) $s['id'] ?>" title="Gestionează ora">
+              <div class="cal-time"><?= date('H:i', strtotime((string) $s['starts_at'])) ?> · <?= (int) $s['duration_min'] ?> min</div>
+              <div class="cal-title"><?= e($s['title']) ?></div>
+              <div class="cal-meta">
+                <span class="cal-pill grade"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
+                <span class="cal-pill<?= (int) $s['booked'] >= (int) $s['capacity'] ? ' full' : '' ?>"><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?> înscriși</span>
+                <?php if (!$s['meet_link']): ?><span class="cal-pill nolink">fără link</span><?php endif; ?>
+                <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
+              </div>
+            </a>
+            <?php endforeach; ?>
           </div>
-          <a href="/admin/ora.php?id=<?= (int) $s['id'] ?>" style="font-weight:700;color:var(--pen);text-decoration:none">Gestionează →</a>
+          <?php endfor; ?>
         </div>
-      <?php endforeach; ?>
+      <?php endif; ?>
+
+      <?php if ($laterSessions): ?>
+        <h2 style="margin-top:18px">Mai departe <span class="muted" style="font-size:.85rem">(după 14 zile)</span></h2>
+        <?php foreach ($laterSessions as $s): $clash = isset($overlap[(int) $s['id']]); ?>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
+            <div>
+              <strong><?= e($s['title']) ?></strong>
+              <span class="b b-pending"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
+              <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
+              <div class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min
+                · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
+                <?= $s['meet_link'] ? ' · are link' : ' · fără link încă' ?></div>
+            </div>
+            <a href="/admin/ora.php?id=<?= (int) $s['id'] ?>" style="font-weight:700;color:var(--pen);text-decoration:none">Gestionează →</a>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
 
       <?php if ($pastSessions): ?>
         <h2 style="margin-top:18px">Ore trecute <span class="muted" style="font-size:.85rem">(pentru prezență)</span></h2>
