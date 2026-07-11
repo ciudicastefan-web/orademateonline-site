@@ -94,12 +94,8 @@ function client_ip(): string
 
 function send_app_mail(string $to, string $subject, string $body): bool
 {
-    $headers = implode("\r\n", [
-        'From: Ora de Mate Online <no-reply@orademateonline.ro>',
-        'Reply-To: no-reply@orademateonline.ro',
-        'Content-Type: text/plain; charset=UTF-8',
-    ]);
-    return mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
+    require_once __DIR__ . '/_mail.php';
+    return smtp_send($to, $subject, $body);
 }
 
 /** Utilizatorul logat sau null. */
