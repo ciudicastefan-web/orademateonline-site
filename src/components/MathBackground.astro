@@ -1,0 +1,158 @@
+---
+// Fundalul „caietul care se rezolvă singur”: scene de matematică în marginile
+// paginii, care avansează pas cu pas pe măsură ce utilizatorul derulează.
+// Stă la z-index -1 (sub TOT conținutul) și e ascuns pe ecrane înguste.
+---
+
+<div class="mathbg" aria-hidden="true">
+  <!-- Scena 1 (stânga sus): ecuația care se rezolvă -->
+  <svg class="scene sc-eq" viewBox="0 0 240 190">
+    <text class="st" data-at="0.02" x="10" y="30">2x + 6 = 14</text>
+    <text class="st" data-at="0.10" x="10" y="70">2x = 14 − 6</text>
+    <text class="st" data-at="0.18" x="10" y="110">2x = 8</text>
+    <text class="st" data-at="0.26" x="10" y="150">x = 4</text>
+    <ellipse class="draw" data-from="0.28" data-to="0.36" cx="42" cy="144" rx="38" ry="22" pathLength="1" />
+  </svg>
+
+  <!-- Scena 2 (dreapta sus): triunghiul care-și află unghiul -->
+  <svg class="scene sc-tri" viewBox="0 0 240 210">
+    <path class="draw" data-from="0.05" data-to="0.20" d="M20 180 L220 180 L150 40 Z" pathLength="1" />
+    <path class="draw" data-from="0.22" data-to="0.26" d="M55 180 A35 35 0 0 0 50 162" pathLength="1" />
+    <text class="st sm" data-at="0.26" x="62" y="168">60°</text>
+    <path class="draw" data-from="0.28" data-to="0.32" d="M185 180 A35 35 0 0 1 193 164" pathLength="1" />
+    <text class="st sm" data-at="0.32" x="150" y="168">80°</text>
+    <text class="st sm" data-at="0.38" x="30" y="30">180° − 60° − 80°</text>
+    <text class="st" data-at="0.44" x="128" y="72">40°</text>
+  </svg>
+
+  <!-- Scena 3 (stânga mijloc): fracția care se simplifică -->
+  <svg class="scene sc-frac" viewBox="0 0 220 130">
+    <text class="st" data-at="0.36" x="10" y="45">12∕18</text>
+    <text class="st" data-at="0.44" x="88" y="45">= 6∕9</text>
+    <text class="st" data-at="0.52" x="10" y="100">= 2∕3</text>
+    <text class="st ok" data-at="0.58" x="92" y="100">✓</text>
+  </svg>
+
+  <!-- Scena 4 (dreapta mijloc): cercul care-și calculează aria -->
+  <svg class="scene sc-circ" viewBox="0 0 220 210">
+    <circle class="draw" data-from="0.46" data-to="0.60" cx="110" cy="80" r="60" pathLength="1" />
+    <path class="draw" data-from="0.60" data-to="0.64" d="M110 80 L170 80" pathLength="1" />
+    <text class="st sm" data-at="0.64" x="128" y="72">r = 3</text>
+    <text class="st" data-at="0.70" x="30" y="175">A = πr²</text>
+    <text class="st" data-at="0.78" x="120" y="175">= 9π</text>
+  </svg>
+
+  <!-- Scena 5 (stânga jos): Pitagora 3-4-5 -->
+  <svg class="scene sc-pyt" viewBox="0 0 250 210">
+    <path class="draw" data-from="0.62" data-to="0.76" d="M30 180 L190 180 L190 60 Z" pathLength="1" />
+    <path class="draw" data-from="0.76" data-to="0.78" d="M178 180 L178 168 L190 168" pathLength="1" />
+    <text class="st sm" data-at="0.78" x="100" y="200">4</text>
+    <text class="st sm" data-at="0.80" x="200" y="125">3</text>
+    <text class="st sm" data-at="0.84" x="80" y="110">c</text>
+    <text class="st" data-at="0.88" x="10" y="35">3² + 4² = 25</text>
+    <text class="st" data-at="0.94" x="60" y="150" transform="rotate(-37 60 150)">c = 5</text>
+  </svg>
+</div>
+
+<style>
+  .mathbg {
+    position: fixed;
+    inset: 0;
+    z-index: -1; /* sub tot conținutul — nu poate acoperi nimic, niciodată */
+    pointer-events: none;
+  }
+
+  .scene {
+    position: absolute;
+    width: clamp(180px, 15vw, 250px);
+    overflow: visible;
+  }
+
+  .sc-eq   { top: 12%; left: 1.5vw; }
+  .sc-tri  { top: 9%;  right: 1.5vw; }
+  .sc-frac { top: 46%; left: 2vw; }
+  .sc-circ { top: 44%; right: 2vw; }
+  .sc-pyt  { top: 74%; left: 1.5vw; }
+
+  /* pe ecrane înguste conținutul acoperă marginile — ascundem scenele */
+  @media (max-width: 1180px) {
+    .mathbg { display: none; }
+  }
+
+  text {
+    font-family: 'Fraunces Variable', Georgia, serif;
+    font-style: italic;
+    font-size: 24px;
+    fill: rgba(29, 46, 82, 0.28);
+  }
+
+  text.sm { font-size: 17px; }
+
+  text.ok { fill: rgba(228, 87, 46, 0.45); font-style: normal; }
+
+  .st {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .st.on {
+    opacity: 1;
+    transform: none;
+  }
+
+  .draw {
+    fill: none;
+    stroke: rgba(228, 87, 46, 0.30);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .sc-tri .draw, .sc-circ .draw, .sc-pyt .draw {
+    stroke: rgba(29, 46, 82, 0.22);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .st { transition: none; }
+  }
+</style>
+
+<script>
+  // Progresul derulării (0→1) conduce „rezolvarea”: pașii apar la pragul lor,
+  // iar figurile se desenează proporțional în intervalul lor [from, to].
+  const steps = Array.from(document.querySelectorAll<SVGElement>('.mathbg .st'));
+  const draws = Array.from(document.querySelectorAll<SVGGeometryElement>('.mathbg .draw'));
+
+  let ticking = false;
+
+  function apply() {
+    ticking = false;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    // paginile scurte „se rezolvă” și ele complet, doar mai repede
+    const p = max > 40 ? Math.min(1, window.scrollY / max) : 1;
+
+    for (const el of steps) {
+      el.classList.toggle('on', p >= parseFloat(el.dataset.at || '0'));
+    }
+    for (const el of draws) {
+      const a = parseFloat(el.dataset.from || '0');
+      const b = parseFloat(el.dataset.to || '1');
+      const t = Math.min(1, Math.max(0, (p - a) / (b - a)));
+      el.style.strokeDashoffset = String(1 - t);
+    }
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(apply);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  apply();
+</script>

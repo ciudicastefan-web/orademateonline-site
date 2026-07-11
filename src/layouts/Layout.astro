@@ -4,6 +4,7 @@
 import '@fontsource-variable/fraunces';
 import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
+import MathBackground from '../components/MathBackground.astro';
 
 interface Props {
   title: string;
@@ -39,6 +40,7 @@ const nav = [
   </head>
 
   <body>
+    <MathBackground />
     <header>
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">π</span>
@@ -99,8 +101,14 @@ const nav = [
     box-sizing: border-box;
   }
 
+  /* Caroiajul stă pe <html> (pânza de fund), ca stratul de matematică animată
+     (z-index -1) să poată trăi ÎNTRE hârtie și conținut. */
   html {
-    background: var(--paper);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 255, 255, 0.75), transparent 60%),
+      repeating-linear-gradient(to right, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
+      repeating-linear-gradient(to bottom, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
+      var(--paper);
   }
 
   body {
@@ -110,11 +118,7 @@ const nav = [
     align-items: center;
     font-family: 'Atkinson Hyperlegible', sans-serif;
     color: var(--ink);
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(255, 255, 255, 0.75), transparent 60%),
-      repeating-linear-gradient(to right, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
-      repeating-linear-gradient(to bottom, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
-      var(--paper);
+    background: transparent;
     position: relative;
     overflow-x: hidden;
   }
