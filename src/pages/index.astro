@@ -91,7 +91,24 @@ import Layout from '../layouts/Layout.astro';
       </article>
     </section>
 
-    <section class="reviews reveal" style="--i: 8" aria-label="Părerile părinților">
+    <section class="mat-band reveal" style="--i: 8" aria-label="Materiale digitale">
+      <h2 class="sec-title">Materiale digitale, pe clase</h2>
+      <p class="mat-lead">
+        Teste cu rezolvări complete, exemple lucrate pas cu pas și teoria esențială —
+        plus pregătire pentru Evaluarea Națională și Bacalaureat. Toate în format PDF,
+        descărcabile direct din contul tău.
+      </p>
+      <div class="mat-chips" aria-hidden="true">
+        <span>✔ Teste rezolvate</span>
+        <span>➗ Exemple pas cu pas</span>
+        <span>📐 Teorie pe scurt</span>
+        <span>🎯 Evaluarea Națională</span>
+        <span>🎓 Bacalaureat</span>
+      </div>
+      <a class="btn-ghost" href="/materiale">Vezi toate categoriile →</a>
+    </section>
+
+    <section class="reviews reveal" style="--i: 9" aria-label="Părerile părinților">
       <h2 class="sec-title">Părerile părinților</h2>
       <div class="review-placeholder">
         <p class="rp-big">„...”</p>
@@ -359,6 +376,45 @@ import Layout from '../layouts/Layout.astro';
     line-height: 1.6;
     color: var(--ink-soft);
     font-size: 0.98rem;
+  }
+
+  .mat-band {
+    margin-top: clamp(52px, 9vh, 84px);
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 20px;
+    padding: clamp(28px, 5vw, 44px);
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+  }
+
+  .mat-lead {
+    margin: 14px auto 0;
+    max-width: 56ch;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  .mat-chips {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .mat-chips span {
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(228, 87, 46, 0.08);
+    color: var(--ink);
+    border: 1px solid rgba(228, 87, 46, 0.25);
+  }
+
+  .mat-band .btn-ghost {
+    display: inline-block;
+    margin-top: 20px;
   }
 
   .reviews {

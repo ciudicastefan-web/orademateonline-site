@@ -1,0 +1,169 @@
+---
+// Pagina „Materiale” — viitoarea vitrină a magazinului de conținut digital.
+// Până la lansarea vânzărilor: prezintă categoriile reale în pregătire + CTA cont.
+import Layout from '../layouts/Layout.astro';
+
+const categories = [
+  {
+    icon: '✔',
+    title: 'Teste cu rezolvări complete',
+    desc: 'Teste pe capitole și pe clase — fiecare cerință cu rezolvarea completă, pas cu pas, ca să înțeleagă, nu doar să verifice rezultatul.',
+  },
+  {
+    icon: '➗',
+    title: 'Exemple rezolvate pas cu pas',
+    desc: 'Probleme-tip explicate ca la oră: ce se cere, de unde pornești, cum gândești fiecare pas. Modelul după care copilul rezolvă apoi singur.',
+  },
+  {
+    icon: '📐',
+    title: 'Teorie pe scurt',
+    desc: 'Fișe de sinteză cu formulele și regulile esențiale ale fiecărui capitol — de pus lângă caiet la teme și înainte de teste.',
+  },
+  {
+    icon: '🎯',
+    title: 'Pregătire Evaluarea Națională',
+    desc: 'Materiale țintite pe structura subiectelor de la Evaluarea Națională — pentru clasa a VIII-a și pentru cei care se pregătesc din timp.',
+  },
+  {
+    icon: '🎓',
+    title: 'Pregătire Bacalaureat',
+    desc: 'Teste și sinteze pe programa de BAC, cu rezolvări detaliate — pentru toate profilurile.',
+  },
+  {
+    icon: '🏫',
+    title: 'Pe clasa copilului tău',
+    desc: 'Materialele sunt organizate pe clase, de la gimnaziu la liceu — cumperi exact ce i se potrivește, fără pachete umflate.',
+  },
+];
+---
+
+<Layout
+  title="Materiale digitale — Ora de Mate Online"
+  description="Teste cu rezolvări complete, exemple pas cu pas, teorie pe scurt, pregătire pentru Evaluarea Națională și BAC — PDF-uri descărcabile, pe clase."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Materiale digitale</p>
+    <h1 class="reveal" style="--i: 1">Matematica rezolvată, <br />explicată, descărcabilă.</h1>
+    <p class="lead reveal" style="--i: 2">
+      PDF-uri create de profesoară, pe clase și pe capitole: teste cu rezolvări
+      complete, exemple lucrate pas cu pas și teoria esențială — pe care copilul
+      le descarcă din contul tău și le folosește oricând, în ritmul lui.
+    </p>
+
+    <div class="cats">
+      {categories.map((c, i) => (
+        <article class="cat reveal" style={`--i: ${i + 3}`}>
+          <span class="cat-icon" aria-hidden="true">{c.icon}</span>
+          <h2>{c.title}</h2>
+          <p>{c.desc}</p>
+        </article>
+      ))}
+    </div>
+
+    <section class="how reveal" style="--i: 9">
+      <h2>Cum va funcționa</h2>
+      <ol>
+        <li>Alegi materialul potrivit clasei copilului</li>
+        <li>Plătești online, cu cardul — primești automat factura</li>
+        <li>Materialul apare instant în contul tău, la „Materialele mele”, gata de descărcat</li>
+      </ol>
+    </section>
+
+    <aside class="soon reveal" style="--i: 10">
+      🛒 <strong>Primele titluri și prețurile se anunță la deschiderea magazinului.</strong>
+      <a href="/inregistrare">Creează-ți contul</a> ca să afli primul — și să faci, tot atunci,
+      testul gratuit de evaluare care îți arată exact de ce materiale are nevoie copilul.
+    </aside>
+  </main>
+</Layout>
+
+<style>
+  .kicker { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--pen); }
+  h1 { margin-top: 10px; font-size: clamp(1.9rem, 5vw, 3rem); }
+  .lead { margin-top: 16px; max-width: 60ch; font-size: 1.08rem; line-height: 1.7; color: var(--ink-soft); }
+
+  .cats {
+    margin-top: clamp(32px, 5vh, 48px);
+    display: grid;
+    gap: 18px;
+  }
+
+  @media (min-width: 700px) { .cats { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .cats { grid-template-columns: repeat(3, 1fr); } }
+
+  .cat {
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .cat:hover {
+    transform: translateY(-4px) rotate(-0.3deg);
+    box-shadow: 0 10px 26px rgba(29, 46, 82, 0.11);
+  }
+
+  .cat-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 1.3rem;
+    background: rgba(228, 87, 46, 0.1);
+  }
+
+  .cat h2 {
+    margin-top: 14px;
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.16rem;
+  }
+
+  .cat p {
+    margin-top: 8px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    font-size: 0.96rem;
+  }
+
+  .how {
+    margin-top: clamp(36px, 6vh, 56px);
+    max-width: 560px;
+  }
+
+  .how h2 {
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+  }
+
+  .how ol {
+    margin: 16px 0 0 22px;
+    display: grid;
+    gap: 10px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .how li::marker {
+    color: var(--pen);
+    font-weight: 700;
+  }
+
+  .soon {
+    margin-top: 30px;
+    max-width: 640px;
+    padding: 18px 22px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(228, 87, 46, 0.5);
+    background: rgba(228, 87, 46, 0.05);
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  .soon strong { color: var(--ink); }
+  .soon a { color: var(--pen); font-weight: 700; }
+</style>
