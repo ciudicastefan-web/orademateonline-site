@@ -139,6 +139,39 @@ function e(string $s): string
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
+/** Interpretează câmpul „clasa” din formularele de admin: fie o clasă exactă (0–12),
+ *  fie o grupă mixtă de clase apropiate: p = Pregătitoare–IV, g = V–VIII, l = IX–XII.
+ *  Returnează [grade, grade_max|null]; [-1, null] dacă valoarea e invalidă. */
+function parse_grade_field(string $v): array
+{
+    $bands = ['p' => [0, 4], 'g' => [5, 8], 'l' => [9, 12]];
+    if (isset($bands[$v])) {
+        return $bands[$v];
+    }
+    if (ctype_digit($v) && (int) $v <= 12) {
+        return [(int) $v, null];
+    }
+    return [-1, null];
+}
+
+/** Eticheta clasei unei ore: „Clasa a VI-a” sau, la grupele mixte, „Clasele V–VIII (mix)”. */
+function grade_label(int $grade, ?int $gradeMax): string
+{
+    $names = ['Pregătitoare','Clasa I','Clasa a II-a','Clasa a III-a','Clasa a IV-a','Clasa a V-a',
+              'Clasa a VI-a','Clasa a VII-a','Clasa a VIII-a','Clasa a IX-a','Clasa a X-a','Clasa a XI-a','Clasa a XII-a'];
+    $roman = ['P','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    if ($gradeMax === null || $gradeMax <= $grade) {
+        return $names[$grade] ?? '';
+    }
+    return 'Clasele ' . ($roman[$grade] ?? '') . '–' . ($roman[$gradeMax] ?? '') . ' (mix)';
+}
+
+/** Elevul se încadrează la oră? (clasa exactă sau în intervalul grupei mixte) */
+function grade_matches(int $childGrade, int $grade, ?int $gradeMax): bool
+{
+    return $childGrade >= $grade && $childGrade <= ($gradeMax ?? $grade);
+}
+
 /** Adminii se definesc prin ADMIN_EMAILS în app_config.php (listă separată prin virgulă). */
 function is_admin(array $u): bool
 {

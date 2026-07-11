@@ -29,6 +29,9 @@ if (!$sess || $sess['status'] !== 'active' || strtotime((string) $sess['starts_a
     redirect($back . '?err=programare');
 }
 
+$sessGrade = (int) $sess['grade'];
+$sessGradeMax = $sess['grade_max'] !== null ? (int) $sess['grade_max'] : null;
+
 if ($childId > 0) {
     $st = $pdo->prepare('SELECT * FROM children WHERE id = ? AND user_id = ?');
     $st->execute([$childId, $u['id']]);
@@ -45,20 +48,29 @@ if ($childId > 0) {
     if (mb_strlen($newChildSchool) > 160) {
         $newChildSchool = mb_substr($newChildSchool, 0, 160);
     }
+    // la clasa exactă o preluăm de la oră; la grupele mixte o alege părintele din interval
+    if ($sessGradeMax !== null && $sessGradeMax > $sessGrade) {
+        $newGrade = (int) ($_POST['new_child_grade'] ?? -1);
+        if (!grade_matches($newGrade, $sessGrade, $sessGradeMax)) {
+            redirect($back . '?err=copil-clasa');
+        }
+    } else {
+        $newGrade = $sessGrade;
+    }
     $st = $pdo->prepare('SELECT COUNT(*) FROM children WHERE user_id = ?');
     $st->execute([$u['id']]);
     if ((int) $st->fetchColumn() >= 6) {
         redirect($back . '?err=copil-limita');
     }
     $pdo->prepare('INSERT INTO children (user_id, first_name, grade, school) VALUES (?, ?, ?, ?)')
-        ->execute([$u['id'], $newChildName, (int) $sess['grade'], $newChildSchool !== '' ? $newChildSchool : null]);
+        ->execute([$u['id'], $newChildName, $newGrade, $newChildSchool !== '' ? $newChildSchool : null]);
     $childId = (int) $pdo->lastInsertId();
-    $child = ['id' => $childId, 'grade' => (int) $sess['grade']];
+    $child = ['id' => $childId, 'grade' => $newGrade];
 } else {
     redirect($back . '?err=programare');
 }
 
-if ((int) $sess['grade'] !== (int) $child['grade']) {
+if (!grade_matches((int) $child['grade'], $sessGrade, $sessGradeMax)) {
     redirect($back . '?err=programare-clasa');
 }
 

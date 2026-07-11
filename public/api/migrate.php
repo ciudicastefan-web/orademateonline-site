@@ -131,6 +131,15 @@ try {
                      ADD COLUMN new_email_expires_at DATETIME NULL');
     }
 
+    // v6: grupe mixte — o oră poate accepta un interval de clase (grade..grade_max);
+    // NULL înseamnă clasă exactă, ca până acum
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'class_sessions'
+                          AND COLUMN_NAME = 'grade_max'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE class_sessions ADD COLUMN grade_max TINYINT UNSIGNED NULL');
+    }
+
     // folderul privat pentru fișierele materialelor (în afara public_html)
     $mat = dirname(__DIR__, 2) . '/materiale';
     if (!is_dir($mat)) {
@@ -138,7 +147,7 @@ try {
     }
 
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK (v5). Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v6). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());

@@ -247,7 +247,7 @@ function status_badge(array $u): string
               <div class="cal-time"><?= date('H:i', strtotime((string) $s['starts_at'])) ?> · <?= (int) $s['duration_min'] ?> min</div>
               <div class="cal-title"><?= e($s['title']) ?></div>
               <div class="cal-meta">
-                <span class="cal-pill grade"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
+                <span class="cal-pill grade"><?= e(grade_label((int) $s['grade'], $s['grade_max'] !== null ? (int) $s['grade_max'] : null)) ?></span>
                 <span class="cal-pill<?= (int) $s['booked'] >= (int) $s['capacity'] ? ' full' : '' ?>"><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?> înscriși</span>
                 <?php if (!$s['meet_link']): ?><span class="cal-pill nolink">fără link</span><?php endif; ?>
                 <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
@@ -265,7 +265,7 @@ function status_badge(array $u): string
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
             <div>
               <strong><?= e($s['title']) ?></strong>
-              <span class="b b-pending"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
+              <span class="b b-pending"><?= e(grade_label((int) $s['grade'], $s['grade_max'] !== null ? (int) $s['grade_max'] : null)) ?></span>
               <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
               <div class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min
                 · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
@@ -282,7 +282,7 @@ function status_badge(array $u): string
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
             <div>
               <strong><?= e($s['title']) ?></strong>
-              <span class="b <?= $s['status'] === 'active' ? 'b-pending' : 'b-blocked' ?>"><?= $s['status'] === 'active' ? e($grades[(int) $s['grade']] ?? '') : 'anulată' ?></span>
+              <span class="b <?= $s['status'] === 'active' ? 'b-pending' : 'b-blocked' ?>"><?= $s['status'] === 'active' ? e(grade_label((int) $s['grade'], $s['grade_max'] !== null ? (int) $s['grade_max'] : null)) : 'anulată' ?></span>
               <span class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · înscriși: <?= (int) $s['booked'] ?></span>
             </div>
             <a href="/admin/ora.php?id=<?= (int) $s['id'] ?>" style="font-weight:700;color:var(--pen);text-decoration:none">Prezență →</a>
@@ -297,7 +297,14 @@ function status_badge(array $u): string
         </label>
         <label>Clasa
           <select name="grade" required>
-            <?php foreach ($grades as $i => $g): ?><option value="<?= $i ?>"><?= e($g) ?></option><?php endforeach; ?>
+            <optgroup label="Clasă exactă">
+              <?php foreach ($grades as $i => $g): ?><option value="<?= $i ?>"><?= e($g) ?></option><?php endforeach; ?>
+            </optgroup>
+            <optgroup label="Grupă mixtă (clase apropiate)">
+              <option value="p">🔀 Mix Primar — Pregătitoare–IV</option>
+              <option value="g">🔀 Mix Gimnaziu — V–VIII</option>
+              <option value="l">🔀 Mix Liceu — IX–XII</option>
+            </optgroup>
           </select>
         </label>
         <label>Data <input type="date" name="date" required /></label>

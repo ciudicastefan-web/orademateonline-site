@@ -113,8 +113,15 @@ import Layout from '../layouts/Layout.astro';
         Construit exclusiv cu DOM API + textContent — sigur prin construcție. ── */
   const GRADES = ['Pregătitoare','Clasa I','Clasa a II-a','Clasa a III-a','Clasa a IV-a','Clasa a V-a',
     'Clasa a VI-a','Clasa a VII-a','Clasa a VIII-a','Clasa a IX-a','Clasa a X-a','Clasa a XI-a','Clasa a XII-a'];
+  const ROMAN = ['P','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
   const DAYS = ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
   const MONTHS = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
+
+  /* orele pot fi pe o clasă exactă sau pe o grupă mixtă (interval de clase) */
+  const gradeMax = (s: any): number => (s.grade_max ?? s.grade) as number;
+  const isMix = (s: any): boolean => gradeMax(s) > s.grade;
+  const gradeLabel = (s: any): string =>
+    isMix(s) ? `Clasele ${ROMAN[s.grade]}–${ROMAN[gradeMax(s)]} (mix)` : (GRADES[s.grade] ?? '');
 
   const root = document.getElementById('cal-root')!;
 
@@ -138,6 +145,7 @@ import Layout from '../layouts/Layout.astro';
     'err=programare': ['Programarea nu a putut fi făcută. Încearcă din nou.', true],
     'err=copil-nume': ['Prenumele elevului trebuie să aibă între 2 și 80 de caractere.', true],
     'err=copil-limita': ['Ai atins numărul maxim de profiluri de elevi (6).', true],
+    'err=copil-clasa': ['Alege clasa elevului.', true],
   };
   const q = window.location.search.replace('?', '');
   const flashEl = document.getElementById('cal-flash')!;
@@ -232,14 +240,14 @@ import Layout from '../layouts/Layout.astro';
       for (const s of daySessions) {
         const full = s.free <= 0;
         const enrolled = s.enrolled_children.length > 0;
-        const matching = children.filter((c: any) => c.grade === s.grade);
+        const matching = children.filter((c: any) => c.grade >= s.grade && c.grade <= gradeMax(s));
 
         const card = el('div', 'cal-card' + (enrolled ? ' mine' : ''));
         card.append(el('div', 'cal-time', `${String(s.starts_at).slice(11, 16)} · ${s.duration} min`));
         card.append(el('div', 'cal-title', String(s.title)));
 
         const meta = el('div', 'cal-meta');
-        meta.append(el('span', 'cal-pill grade', GRADES[s.grade] ?? ''));
+        meta.append(el('span', 'cal-pill grade', gradeLabel(s)));
         if (enrolled) meta.append(el('span', 'cal-pill ok', 'înscris ✓'));
         else if (full) meta.append(el('span', 'cal-pill full', 'complet'));
         else meta.append(el('span', 'cal-pill', `${s.free} ${s.free === 1 ? 'loc liber' : 'locuri libere'}`));
@@ -292,9 +300,23 @@ import Layout from '../layouts/Layout.astro';
           const schoolIn = el('input');
           schoolIn.type = 'text'; schoolIn.name = 'new_child_school';
           schoolIn.placeholder = 'Școala (opțional)'; schoolIn.maxLength = 160;
-          form.append(h1, h2, nameIn, schoolIn,
-            el('div', 'cal-add-note', `Îl trecem automat la ${GRADES[s.grade] ?? 'clasa orei'}.`),
-            el('button', '', 'Adaugă elevul și înscrie-l'));
+          form.append(h1, h2, nameIn, schoolIn);
+          if (isMix(s)) {
+            // grupă mixtă: părintele alege clasa elevului din intervalul orei
+            const gradeSel = el('select'); gradeSel.name = 'new_child_grade'; gradeSel.required = true;
+            const ph = el('option', '', 'Clasa elevului…');
+            ph.value = ''; ph.disabled = true; ph.selected = true;
+            gradeSel.append(ph);
+            for (let g = s.grade; g <= gradeMax(s); g++) {
+              const opt = el('option', '', GRADES[g] ?? '');
+              opt.value = String(g);
+              gradeSel.append(opt);
+            }
+            form.append(gradeSel);
+          } else {
+            form.append(el('div', 'cal-add-note', `Îl trecem automat la ${GRADES[s.grade] ?? 'clasa orei'}.`));
+          }
+          form.append(el('button', '', 'Adaugă elevul și înscrie-l'));
           det.append(form);
           card.append(det);
         }

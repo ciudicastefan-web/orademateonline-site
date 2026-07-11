@@ -111,7 +111,7 @@ foreach ($map as $k => $m) {
       <?php else: ?><span class="b b-ok">activă</span><?php endif; ?>
     </h1>
     <p class="sub">
-      <?= e($grades[(int) $sess['grade']] ?? '') ?> ·
+      <?= e(grade_label((int) $sess['grade'], $sess['grade_max'] !== null ? (int) $sess['grade_max'] : null)) ?> ·
       <?= e(date('d.m.Y, H:i', $startsTs)) ?> · <?= (int) $sess['duration_min'] ?> min ·
       înscriși: <?= count($booked) ?>/<?= (int) $sess['capacity'] ?>
     </p>
@@ -127,10 +127,22 @@ foreach ($map as $k => $m) {
         <input type="hidden" name="session_id" value="<?= (int) $sess['id'] ?>" />
         <label class="full">Titlu <input type="text" name="title" required minlength="3" maxlength="160" value="<?= e($sess['title']) ?>" /></label>
         <label>Clasa
+          <?php
+            // valoarea curentă: clasa exactă (număr) sau litera grupei mixte
+            $isMix = $sess['grade_max'] !== null && (int) $sess['grade_max'] > (int) $sess['grade'];
+            $current = $isMix ? ([0 => 'p', 5 => 'g', 9 => 'l'][(int) $sess['grade']] ?? 'p') : (string) (int) $sess['grade'];
+          ?>
           <select name="grade" required>
-            <?php foreach ($grades as $i => $g): ?>
-              <option value="<?= $i ?>" <?= $i === (int) $sess['grade'] ? 'selected' : '' ?>><?= e($g) ?></option>
-            <?php endforeach; ?>
+            <optgroup label="Clasă exactă">
+              <?php foreach ($grades as $i => $g): ?>
+                <option value="<?= $i ?>" <?= $current === (string) $i ? 'selected' : '' ?>><?= e($g) ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+            <optgroup label="Grupă mixtă (clase apropiate)">
+              <option value="p" <?= $current === 'p' ? 'selected' : '' ?>>🔀 Mix Primar — Pregătitoare–IV</option>
+              <option value="g" <?= $current === 'g' ? 'selected' : '' ?>>🔀 Mix Gimnaziu — V–VIII</option>
+              <option value="l" <?= $current === 'l' ? 'selected' : '' ?>>🔀 Mix Liceu — IX–XII</option>
+            </optgroup>
           </select>
         </label>
         <label>Data <input type="date" name="date" required value="<?= e(date('Y-m-d', $startsTs)) ?>" /></label>

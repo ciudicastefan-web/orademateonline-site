@@ -9,7 +9,7 @@ require_same_origin();
 require_admin();
 
 $title = trim($_POST['title'] ?? '');
-$grade = (int) ($_POST['grade'] ?? -1);
+[$grade, $gradeMax] = parse_grade_field(trim($_POST['grade'] ?? ''));
 $date = trim($_POST['date'] ?? '');
 $time = trim($_POST['time'] ?? '');
 $duration = max(15, min(240, (int) ($_POST['duration'] ?? 60)));
@@ -18,15 +18,15 @@ $meetLink = trim($_POST['meet_link'] ?? '');
 
 $startsAt = strtotime($date . ' ' . $time);
 
-if (mb_strlen($title) < 3 || $grade < 0 || $grade > 12 || $startsAt === false || $startsAt < time()) {
+if (mb_strlen($title) < 3 || $grade < 0 || $startsAt === false || $startsAt < time()) {
     redirect('/admin/?err=ora-invalida');
 }
 if ($meetLink !== '' && !filter_var($meetLink, FILTER_VALIDATE_URL)) {
     redirect('/admin/?err=ora-link');
 }
 
-db()->prepare('INSERT INTO class_sessions (title, grade, starts_at, duration_min, capacity, meet_link)
-               VALUES (?, ?, ?, ?, ?, ?)')
-    ->execute([$title, $grade, date('Y-m-d H:i:s', $startsAt), $duration, $capacity, $meetLink !== '' ? $meetLink : null]);
+db()->prepare('INSERT INTO class_sessions (title, grade, grade_max, starts_at, duration_min, capacity, meet_link)
+               VALUES (?, ?, ?, ?, ?, ?, ?)')
+    ->execute([$title, $grade, $gradeMax, date('Y-m-d H:i:s', $startsAt), $duration, $capacity, $meetLink !== '' ? $meetLink : null]);
 
 redirect('/admin/?ok=ora-creata');

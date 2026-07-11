@@ -62,7 +62,8 @@ foreach ($children as $c) {
            (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked,
            (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.child_id = ? AND b.status = "booked") AS mine
          FROM class_sessions s
-         WHERE s.grade = ? AND s.starts_at > NOW() AND s.status = "active"
+         WHERE ? BETWEEN s.grade AND COALESCE(s.grade_max, s.grade)
+           AND s.starts_at > NOW() AND s.status = "active"
          ORDER BY s.starts_at LIMIT 8'
     );
     $st->execute([$c['id'], $c['grade']]);

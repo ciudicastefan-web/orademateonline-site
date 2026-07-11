@@ -27,7 +27,7 @@ $children = array_map(static fn ($c) => [
 ], $st->fetchAll());
 
 $st = $pdo->prepare(
-    'SELECT s.id, s.title, s.grade, s.starts_at, s.duration_min, s.capacity, s.meet_link,
+    'SELECT s.id, s.title, s.grade, s.grade_max, s.starts_at, s.duration_min, s.capacity, s.meet_link,
        (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked
      FROM class_sessions s
      WHERE s.status = "active" AND s.starts_at >= NOW()
@@ -58,6 +58,7 @@ foreach ($sessions as $s) {
         'id' => $id,
         'title' => $s['title'],
         'grade' => (int) $s['grade'],
+        'grade_max' => $s['grade_max'] !== null ? (int) $s['grade_max'] : null,
         'starts_at' => $s['starts_at'],
         'duration' => (int) $s['duration_min'],
         'capacity' => (int) $s['capacity'],
