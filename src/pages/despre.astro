@@ -51,6 +51,7 @@ import Layout from '../layouts/Layout.astro';
     <aside class="soon reveal" style="--i: 5">
       ✏️ <strong>În curând aici:</strong> povestea profesoarei, calificările ei și
       metoda de lucru, povestite pe îndelete. Pagina se scrie chiar acum.
+      Ai o întrebare până atunci? <a class="soon-cta" href="/contact">Scrie-ne un mesaj →</a>
     </aside>
   </main>
 </Layout>
@@ -127,5 +128,10 @@ import Layout from '../layouts/Layout.astro';
 
   .soon strong {
     color: var(--ink);
+  }
+
+  .soon-cta {
+    color: var(--pen);
+    font-weight: 700;
   }
 </style>

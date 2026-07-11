@@ -114,6 +114,7 @@ import Layout from '../layouts/Layout.astro';
           publicate cu acordul lor</strong>. Nu ne împodobim cu laude inventate: dacă scrie
           aici, chiar a spus-o un părinte.
         </p>
+        <p class="rp-link"><a href="/despre">Până atunci, vezi cum lucrăm cu elevii →</a></p>
       </div>
     </section>
 
@@ -439,6 +440,18 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .review-placeholder strong { color: var(--ink); }
+
+  .rp-link {
+    margin-top: 14px;
+  }
+
+  .rp-link a {
+    color: var(--pen);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .rp-link a:hover { text-decoration: underline; }
 
   /* bilețel de caiet „lipit” pe pagină cu bandă adezivă — nu un panou corporate */
   .cta-band {

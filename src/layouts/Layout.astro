@@ -14,12 +14,12 @@ interface Props {
 const { title, description } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
+// meniul de sus ține doar paginile de acțiune; Despre/Contact stau în subsol,
+// plus linkuri contextuale din pagini (Acasă → Despre, Despre → Contact)
 const nav = [
   { href: '/', label: 'Acasă' },
   { href: '/cursuri', label: 'Cursuri' },
   { href: '/materiale', label: 'Materiale' },
-  { href: '/despre', label: 'Despre' },
-  { href: '/contact', label: 'Contact' },
   { href: '/cont/', label: 'Cont' },
 ];
 ---
@@ -74,8 +74,12 @@ const nav = [
     </script>
 
     <footer>
-      <nav class="legal" aria-label="Pagini utile">
+      <nav class="site-links" aria-label="Despre noi">
+        <a href="/despre">Despre noi</a>
+        <a href="/contact">Contact</a>
         <a href="/intrebari-frecvente">Întrebări frecvente</a>
+      </nav>
+      <nav class="legal" aria-label="Pagini legale">
         <a href="/termeni">Termeni și condiții</a>
         <a href="/confidentialitate">Confidențialitate</a>
         <a href="/cookies">Cookie-uri</a>
@@ -275,6 +279,7 @@ const nav = [
     text-align: center;
   }
 
+  footer .site-links,
   footer .legal {
     display: flex;
     gap: 18px;
@@ -283,12 +288,19 @@ const nav = [
     flex-wrap: wrap;
   }
 
+  footer .site-links a,
   footer .legal a {
     color: var(--ink-soft);
     text-decoration: none;
     border-bottom: 1px dashed rgba(81, 97, 138, 0.5);
   }
 
+  footer .site-links a {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  footer .site-links a:hover,
   footer .legal a:hover {
     color: var(--pen);
     border-bottom-color: var(--pen);
