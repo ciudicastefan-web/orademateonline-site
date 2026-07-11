@@ -23,7 +23,10 @@ import Layout from '../layouts/Layout.astro';
         <input type="password" name="password" required autocomplete="current-password" />
       </label>
       <button type="submit">Intră în cont</button>
-      <p class="alt">Nu ai cont? <a href="/inregistrare">Creează unul</a></p>
+      <p class="alt">
+        Nu ai cont? <a href="/inregistrare">Creează unul</a>
+        &nbsp;·&nbsp; <a href="/resetare">Ai uitat parola?</a>
+      </p>
     </form>
   </main>
 </Layout>
@@ -37,6 +40,10 @@ import Layout from '../layouts/Layout.astro';
     'err=gresit': ['Email sau parolă greșită.', true],
     'err=blocat': ['Cont blocat temporar după prea multe încercări. Reîncearcă peste 15 minute.', true],
     'err=neactivat': ['Contul nu e activat încă — caută emailul de activare (și în spam).', true],
+    'ok=reset-trimis': ['Dacă emailul există în sistem, ți-am trimis un link de resetare (valabil 1 oră).', false],
+    'ok=parola-schimbata': ['Parola a fost schimbată! Te poți autentifica cu cea nouă.', false],
+    'err=reset-token': ['Linkul de resetare e invalid sau expirat. Cere unul nou de la „Ai uitat parola?".', true],
+    'err=blocat-admin': ['Acest cont a fost suspendat. Pentru detalii, contactează-ne.', true],
   };
   const q = window.location.search.replace('?', '');
   const flash = document.getElementById('flash')!;

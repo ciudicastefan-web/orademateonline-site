@@ -49,8 +49,17 @@ try {
     foreach ($ddl as $sql) {
         $pdo->query($sql);
     }
+
+    // v2: coloana de suspendare a conturilor (adăugată idempotent)
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'
+                          AND COLUMN_NAME = 'blocked_at'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE users ADD COLUMN blocked_at DATETIME NULL');
+    }
+
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK. Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v2). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());

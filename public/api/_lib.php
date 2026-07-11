@@ -115,3 +115,23 @@ function e(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
+
+/** Adminii se definesc prin ADMIN_EMAILS în app_config.php (listă separată prin virgulă). */
+function is_admin(array $u): bool
+{
+    if (!defined('ADMIN_EMAILS')) {
+        return false;
+    }
+    $admins = array_map('trim', explode(',', strtolower(ADMIN_EMAILS)));
+    return in_array(strtolower($u['email']), $admins, true);
+}
+
+function require_admin(): array
+{
+    $u = current_user();
+    if (!$u || !is_admin($u)) {
+        http_response_code(404);
+        exit('Not found');
+    }
+    return $u;
+}

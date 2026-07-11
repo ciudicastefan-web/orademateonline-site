@@ -25,6 +25,10 @@ if (!$u) {
     redirect('/autentificare?err=gresit');
 }
 
+if (array_key_exists('blocked_at', $u) && $u['blocked_at'] !== null) {
+    redirect('/autentificare?err=blocat-admin');
+}
+
 if ($u['locked_until'] !== null && strtotime((string) $u['locked_until']) > time()) {
     redirect('/autentificare?err=blocat');
 }

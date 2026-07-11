@@ -1,0 +1,88 @@
+---
+// Resetarea parolei: fără token în URL → formular de email;
+// cu token (?uid=..&t=..) → formular de parolă nouă. Comutarea se face în JS.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Resetare parolă — Ora de Mate Online"
+  description="Resetează-ți parola contului Ora de Mate Online."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Cont</p>
+    <h1 class="reveal" style="--i: 1">Resetare parolă</h1>
+
+    <div id="flash" class="flash" hidden></div>
+
+    <form id="form-cerere" class="panel reveal" style="--i: 2" method="post" action="/api/reset-request.php">
+      <p class="muted">Scrie emailul contului și îți trimitem un link de resetare, valabil o oră.</p>
+      <label>
+        Email
+        <input type="email" name="email" required maxlength="190" autocomplete="email" />
+      </label>
+      <button type="submit">Trimite linkul</button>
+      <p class="alt"><a href="/autentificare">Înapoi la autentificare</a></p>
+    </form>
+
+    <form id="form-parola" class="panel reveal" style="--i: 2" method="post" action="/api/reset.php" hidden>
+      <p class="muted">Alege o parolă nouă pentru contul tău.</p>
+      <input type="hidden" name="uid" id="f-uid" />
+      <input type="hidden" name="t" id="f-t" />
+      <label>
+        Parolă nouă <span class="hint">minim 10 caractere</span>
+        <input type="password" name="password" required minlength="10" autocomplete="new-password" />
+      </label>
+      <label>
+        Repetă parola
+        <input type="password" name="password2" required minlength="10" autocomplete="new-password" />
+      </label>
+      <button type="submit">Salvează parola nouă</button>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const uid = params.get('uid');
+  const t = params.get('t');
+
+  if (uid && t && /^[a-f0-9]{64}$/.test(t)) {
+    document.getElementById('form-cerere')!.hidden = true;
+    const fp = document.getElementById('form-parola') as HTMLFormElement;
+    fp.hidden = false;
+    (document.getElementById('f-uid') as HTMLInputElement).value = uid;
+    (document.getElementById('f-t') as HTMLInputElement).value = t;
+  }
+
+  const MSG: Record<string, [string, boolean]> = {
+    'err=parola-scurta': ['Parola trebuie să aibă minim 10 caractere.', true],
+    'err=parole': ['Parolele nu coincid.', true],
+  };
+  const q = window.location.search.replace('?', '');
+  const flash = document.getElementById('flash')!;
+  for (const key in MSG) {
+    if (q.includes(key)) {
+      flash.textContent = MSG[key][0];
+      flash.classList.toggle('is-err', MSG[key][1]);
+      flash.hidden = false;
+      break;
+    }
+  }
+</script>
+
+<style>
+  .kicker { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--pen); }
+  h1 { margin-top: 10px; font-size: clamp(1.9rem, 5vw, 2.8rem); }
+  .flash { margin-top: 22px; max-width: 440px; padding: 14px 18px; border-radius: 12px; border: 1.5px dashed rgba(43, 74, 139, 0.4); background: rgba(43, 74, 139, 0.06); line-height: 1.5; }
+  .flash.is-err { border-color: rgba(228, 87, 46, 0.55); background: rgba(228, 87, 46, 0.07); }
+  .panel { margin-top: 26px; max-width: 440px; background: var(--card); border: 1px solid rgba(43, 74, 139, 0.14); border-radius: 14px; padding: 28px; box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06); display: grid; gap: 18px; }
+  .muted { color: var(--ink-soft); font-size: 0.95rem; line-height: 1.55; }
+  label { display: grid; gap: 6px; font-weight: 700; font-size: 0.95rem; }
+  .hint { font-weight: 400; color: var(--ink-soft); font-size: 0.85rem; }
+  input { font: inherit; font-weight: 400; padding: 11px 14px; border-radius: 10px; border: 1.5px solid rgba(43, 74, 139, 0.25); background: #fff; color: var(--ink); }
+  input:focus-visible { outline: 2px solid var(--pen); outline-offset: 1px; }
+  button { font: inherit; font-weight: 700; padding: 13px 18px; border: none; border-radius: 999px; background: var(--ink); color: var(--paper); cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; }
+  button:hover { background: var(--pen); transform: translateY(-1px); }
+  .alt { font-size: 0.92rem; color: var(--ink-soft); text-align: center; }
+  .alt a { color: var(--pen); font-weight: 700; }
+</style>
