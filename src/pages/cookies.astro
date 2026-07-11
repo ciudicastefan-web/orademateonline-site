@@ -1,0 +1,66 @@
+---
+// Politica de cookie-uri. Situația actuală e simplă și sănătoasă:
+// folosim UN singur cookie, strict necesar (sesiunea contului) → fără banner.
+// Dacă vreodată adăugăm analytics/marketing, pagina + bannerul se actualizează.
+import Layout from '../layouts/Layout.astro';
+const updated = '11 iulie 2026';
+---
+
+<Layout
+  title="Politica de cookie-uri — Ora de Mate Online"
+  description="Ce cookie-uri folosește orademateonline.ro: unul singur, strict necesar funcționării contului."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Legal</p>
+    <h1 class="reveal" style="--i: 1">Politica de cookie-uri</h1>
+    <p class="updated reveal" style="--i: 2">Ultima actualizare: {updated}</p>
+
+    <div class="body reveal" style="--i: 3">
+      <p>
+        Vestea scurtă și bună: <strong>nu folosim cookie-uri de urmărire, de publicitate
+        sau de analiză.</strong> De aceea nu te întâmpinăm cu niciun banner de consimțământ.
+      </p>
+
+      <h2>Singurul cookie pe care îl folosim</h2>
+      <table>
+        <thead>
+          <tr><th>Nume</th><th>Rol</th><th>Durată</th><th>Tip</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>omo_sess</code></td>
+            <td>Menține sesiunea contului tău după autentificare (fără el, login-ul nu poate funcționa)</td>
+            <td>Până la închiderea browserului sau deconectare</td>
+            <td>Strict necesar</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Cookie-urile strict necesare nu necesită consimțământ conform legislației
+        (Directiva ePrivacy, transpusă prin Legea 506/2004), pentru că fără ele serviciul
+        cerut de tine — contul — nu poate exista. Cookie-ul se setează doar la autentificare.
+      </p>
+
+      <h2>Dacă lucrurile se schimbă</h2>
+      <p>
+        Dacă vom introduce vreodată instrumente de analiză sau marketing care folosesc
+        cookie-uri neesențiale, această pagină va fi actualizată <em>înainte</em>, iar
+        consimțământul tău va fi cerut printr-un banner, conform legii.
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .kicker { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--pen); }
+  h1 { margin-top: 10px; font-size: clamp(1.8rem, 4.5vw, 2.6rem); }
+  .updated { margin-top: 8px; color: var(--ink-soft); font-size: 0.9rem; }
+  .body { margin-top: 26px; max-width: 68ch; line-height: 1.7; color: var(--ink-soft); }
+  .body h2 { font-family: 'Fraunces Variable', serif; font-weight: 600; font-size: 1.3rem; color: var(--ink); margin: 28px 0 10px; }
+  .body p { margin: 10px 0; }
+  .body strong { color: var(--ink); }
+  table { margin: 14px 0; border-collapse: collapse; width: 100%; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid rgba(43, 74, 139, 0.14); }
+  th, td { padding: 10px 14px; text-align: left; font-size: 0.92rem; border-bottom: 1px solid rgba(43, 74, 139, 0.12); }
+  th { color: var(--ink); background: rgba(43, 74, 139, 0.06); }
+  code { font-family: ui-monospace, monospace; color: var(--pen); }
+</style>

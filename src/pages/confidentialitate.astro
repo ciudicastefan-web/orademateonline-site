@@ -1,73 +1,115 @@
 ---
-// SCHIȚĂ: politica de confidențialitate completă se scrie în faza legală
-// (împreună cu T&C și politica de cookies), înainte de lansare.
+// Politica de confidențialitate (GDPR). Câmpurile [ÎN CURS DE ÎNREGISTRARE]
+// se completează cu datele PFA/SRL la înființare. Recomandat: verificare de
+// către un specialist înainte de lansarea comercială.
 import Layout from '../layouts/Layout.astro';
+const updated = '11 iulie 2026';
 ---
 
 <Layout
   title="Politica de confidențialitate — Ora de Mate Online"
-  description="Cum prelucrăm datele personale la Ora de Mate Online."
+  description="Cum prelucrăm datele personale la Ora de Mate Online: ce colectăm, de ce, cât păstrăm și care sunt drepturile tale."
 >
   <main>
     <p class="kicker reveal" style="--i: 0">Legal</p>
     <h1 class="reveal" style="--i: 1">Politica de confidențialitate</h1>
+    <p class="updated reveal" style="--i: 2">Ultima actualizare: {updated}</p>
 
-    <div class="body reveal" style="--i: 2">
+    <div class="body reveal" style="--i: 3">
+      <h2>1. Cine suntem</h2>
       <p>
-        Pe scurt, principiile după care lucrăm — versiunea completă și detaliată a
-        acestei politici va fi publicată aici înainte de lansarea serviciilor:
+        Site-ul orademateonline.ro („site-ul") oferă servicii de meditații și cursuri
+        de matematică online. Operatorul datelor cu caracter personal este:
+        <strong>[ÎN CURS DE ÎNREGISTRARE — denumirea, CUI-ul și sediul entității juridice
+        vor fi publicate aici la finalizarea înregistrării]</strong>. Până la lansarea
+        comercială, site-ul funcționează în regim de construcție și testare.
+        Contact pentru orice întrebare legată de date: prin pagina de <a href="/contact">Contact</a>.
       </p>
+
+      <h2>2. Ce date colectăm și de ce</h2>
+      <h3>a) Contul de părinte</h3>
       <ul>
-        <li><strong>Contul aparține părintelui.</strong> Despre copil colectăm minimul necesar
-          înscrierii în grupa potrivită: prenumele și clasa (școala — doar dacă alegi să ne-o spui).</li>
-        <li><strong>Colectăm doar ce folosim.</strong> Email-ul tău servește la autentificare și la
-          comunicări despre cont; comunicările de marketing se trimit doar cu acordul tău explicit.</li>
-        <li><strong>Nu vindem și nu împărtășim datele</strong> cu terți în scopuri comerciale.</li>
-        <li><strong>Poți cere oricând</strong> accesul la datele tale, corectarea sau ștergerea lor.</li>
+        <li><strong>Numele, adresa de email, parola</strong> (stocată exclusiv criptografic,
+          ca hash — nimeni nu o poate citi, nici noi) — pentru crearea și securizarea
+          contului. <em>Temei: executarea contractului (art. 6 (1) b GDPR).</em></li>
+        <li><strong>Acordul de marketing</strong> (opțional, bifă separată) — pentru a-ți
+          trimite noutăți despre grupe și materiale. <em>Temei: consimțământ (art. 6 (1) a);
+          îl poți retrage oricând.</em></li>
       </ul>
-      <p class="note">📝 Documentul juridic complet (temeiurile de prelucrare, durata stocării,
-        drepturile GDPR detaliate, datele operatorului) este în curs de redactare și va fi
-        publicat pe această pagină înainte de lansare.</p>
+      <h3>b) Profilul copilului</h3>
+      <p>
+        Aplicăm principiul minimizării datelor, cu atât mai strict cu cât e vorba de minori:
+        colectăm doar <strong>prenumele și clasa</strong> copilului (obligatorii, pentru
+        încadrarea în grupa potrivită) și <strong>școala</strong> (opțional, dacă părintele
+        alege să o completeze). Nu colectăm date de contact ale copiilor, nu creăm conturi
+        pentru copii, nu comunicăm direct cu ei în afara orelor. Profilul e creat și
+        controlat integral de părinte. <em>Temei: executarea contractului.</em>
+      </p>
+      <h3>c) Date tehnice</h3>
+      <p>
+        Jurnalele standard de server (adresa IP, ora accesării) și contorizarea încercărilor
+        de autentificare — exclusiv pentru securitate și prevenirea abuzurilor.
+        <em>Temei: interes legitim (art. 6 (1) f).</em>
+      </p>
+      <h3>d) La activarea plăților</h3>
+      <p>
+        Când vom vinde cursuri și materiale, datele de facturare vor fi prelucrate conform
+        legislației fiscale <em>(temei: obligație legală)</em>, iar plata cu cardul se va
+        face exclusiv prin procesatori autorizați — <strong>datele cardului nu ating și nu
+        sunt stocate niciodată pe serverele noastre</strong>. Această secțiune va fi
+        detaliată înainte de activarea vânzărilor.
+      </p>
+
+      <h2>3. Cât timp păstrăm datele</h2>
+      <ul>
+        <li>Datele contului: cât timp contul există. Îți poți cere ștergerea contului oricând.</li>
+        <li>Conturile neactivate (fără click pe emailul de verificare): se șterg automat.</li>
+        <li>Documentele fiscale (după activarea plăților): pe durata impusă de lege.</li>
+      </ul>
+
+      <h2>4. Cui transmitem date</h2>
+      <p>
+        Nu vindem și nu închiriem date personale, nimănui, niciodată. Datele sunt găzduite
+        pe servere situate în <strong>România</strong> (Hostico / Awesome Projects SRL, în
+        calitate de persoană împuternicită pentru găzduire). La activarea plăților, lista
+        va fi completată cu procesatorul de plăți și furnizorul de facturare, cu care vom
+        avea acorduri de prelucrare conforme GDPR.
+      </p>
+
+      <h2>5. Drepturile tale</h2>
+      <p>Conform GDPR, ai dreptul: de <strong>acces</strong> la datele tale, la
+        <strong>rectificare</strong>, la <strong>ștergere</strong> („dreptul de a fi uitat"),
+        la <strong>restricționarea</strong> prelucrării, la <strong>portabilitate</strong>,
+        de <strong>opoziție</strong>, și de a-ți <strong>retrage consimțământul</strong>
+        (pentru prelucrările bazate pe el) fără a afecta prelucrările anterioare.
+      </p>
+      <p>
+        Pentru exercitarea oricărui drept, scrie-ne prin pagina de <a href="/contact">Contact</a> —
+        răspundem în cel mult 30 de zile. Dacă apreciezi că drepturile ți-au fost încălcate,
+        te poți adresa Autorității Naționale de Supraveghere a Prelucrării Datelor cu
+        Caracter Personal (ANSPDCP) — <a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>.
+      </p>
+
+      <h2>6. Cum protejăm datele</h2>
+      <ul>
+        <li>Conexiune criptată (HTTPS) forțată pe tot site-ul, cu HSTS activ.</li>
+        <li>Parole stocate doar ca hash criptografic (algoritm modern, cu salt).</li>
+        <li>Protecție împotriva atacurilor de tip forță brută la autentificare.</li>
+        <li>Acces la baza de date restricționat la nivel de server, cu credențiale dedicate.</li>
+      </ul>
     </div>
   </main>
 </Layout>
 
 <style>
-  .kicker {
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--pen);
-  }
-
-  h1 {
-    margin-top: 10px;
-    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
-  }
-
-  .body {
-    margin-top: 22px;
-    max-width: 64ch;
-    line-height: 1.7;
-    color: var(--ink-soft);
-  }
-
-  .body strong {
-    color: var(--ink);
-  }
-
-  .body ul {
-    margin: 16px 0 16px 22px;
-    display: grid;
-    gap: 10px;
-  }
-
-  .note {
-    margin-top: 20px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    border: 1.5px dashed rgba(228, 87, 46, 0.5);
-    background: rgba(228, 87, 46, 0.05);
-  }
+  .kicker { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--pen); }
+  h1 { margin-top: 10px; font-size: clamp(1.8rem, 4.5vw, 2.6rem); }
+  .updated { margin-top: 8px; color: var(--ink-soft); font-size: 0.9rem; }
+  .body { margin-top: 26px; max-width: 68ch; line-height: 1.7; color: var(--ink-soft); }
+  .body h2 { font-family: 'Fraunces Variable', serif; font-weight: 600; font-size: 1.35rem; color: var(--ink); margin: 30px 0 10px; }
+  .body h3 { font-weight: 700; font-size: 1.02rem; color: var(--ink); margin: 18px 0 6px; }
+  .body p { margin: 10px 0; }
+  .body ul { margin: 10px 0 10px 22px; display: grid; gap: 8px; }
+  .body strong { color: var(--ink); }
+  .body a { color: var(--pen); }
 </style>

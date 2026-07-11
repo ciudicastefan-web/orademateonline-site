@@ -55,7 +55,12 @@ const nav = [
     <slot />
 
     <footer>
-      © 2026 Ora de Mate Online &nbsp;·&nbsp; orademateonline.ro
+      <nav class="legal" aria-label="Pagini legale">
+        <a href="/termeni">Termeni și condiții</a>
+        <a href="/confidentialitate">Confidențialitate</a>
+        <a href="/cookies">Cookie-uri</a>
+      </nav>
+      <p>© 2026 Ora de Mate Online &nbsp;·&nbsp; orademateonline.ro</p>
     </footer>
   </body>
 </html>
@@ -216,5 +221,25 @@ const nav = [
     letter-spacing: 0.02em;
     position: relative;
     z-index: 2;
+    text-align: center;
+  }
+
+  footer .legal {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  footer .legal a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(81, 97, 138, 0.5);
+  }
+
+  footer .legal a:hover {
+    color: var(--pen);
+    border-bottom-color: var(--pen);
   }
 </style>
