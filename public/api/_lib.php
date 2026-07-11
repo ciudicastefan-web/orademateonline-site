@@ -148,3 +148,23 @@ function require_admin(): array
     }
     return $u;
 }
+
+/** Trimite un email tuturor părinților cu copii înscriși (activ) la o oră.
+ *  Returnează numărul de destinatari. */
+function notify_session_parents(int $sessionId, string $subject, string $body): int
+{
+    $st = db()->prepare(
+        'SELECT DISTINCT u.email, u.full_name FROM bookings b
+         JOIN users u ON u.id = b.user_id
+         WHERE b.session_id = ? AND b.status = "booked" AND u.blocked_at IS NULL'
+    );
+    $st->execute([$sessionId]);
+    $sent = 0;
+    foreach ($st->fetchAll() as $r) {
+        $greeting = 'Salut, ' . $r['full_name'] . "!\n\n";
+        if (send_app_mail($r['email'], $subject, $greeting . $body . "\n\n— Ora de Mate Online\n(email trimis automat — nu răspunde la el)")) {
+            $sent++;
+        }
+    }
+    return $sent;
+}

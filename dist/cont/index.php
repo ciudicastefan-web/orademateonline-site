@@ -29,18 +29,18 @@ $st = $pdo->prepare(
      FROM bookings b
      JOIN class_sessions s ON s.id = b.session_id
      JOIN children c ON c.id = b.child_id
-     WHERE b.user_id = ? AND b.status = "booked" AND s.starts_at >= NOW()
+     WHERE b.user_id = ? AND b.status = "booked" AND s.starts_at >= NOW() AND s.status = "active"
      ORDER BY s.starts_at'
 );
 $st->execute([$u['id']]);
 $upcoming = $st->fetchAll();
 
 $st = $pdo->prepare(
-    'SELECT s.title, s.starts_at, c.first_name
+    'SELECT s.title, s.starts_at, c.first_name, b.attended
      FROM bookings b
      JOIN class_sessions s ON s.id = b.session_id
      JOIN children c ON c.id = b.child_id
-     WHERE b.user_id = ? AND b.status = "booked" AND s.starts_at < NOW()
+     WHERE b.user_id = ? AND b.status = "booked" AND s.starts_at < NOW() AND s.status = "active"
      ORDER BY s.starts_at DESC LIMIT 20'
 );
 $st->execute([$u['id']]);
@@ -54,7 +54,7 @@ foreach ($children as $c) {
            (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked,
            (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.child_id = ? AND b.status = "booked") AS mine
          FROM class_sessions s
-         WHERE s.grade = ? AND s.starts_at > NOW()
+         WHERE s.grade = ? AND s.starts_at > NOW() AND s.status = "active"
          ORDER BY s.starts_at LIMIT 8'
     );
     $st->execute([$c['id'], $c['grade']]);
@@ -293,6 +293,9 @@ foreach ($map as $k => $m) {
               <span class="who"><?= e($h['title']) ?></span> <span class="pill"><?= e($h['first_name']) ?></span>
               <div class="meta"><?= e(ro_dt((string) $h['starts_at'], $months)) ?></div>
             </div>
+            <?php if ($h['attended'] !== null): ?>
+              <span class="pill <?= $h['attended'] ? 'free' : 'full' ?>"><?= $h['attended'] ? 'prezent ✓' : 'absent' ?></span>
+            <?php endif; ?>
           </div>
         <?php endforeach; ?>
       </section>

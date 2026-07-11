@@ -33,7 +33,12 @@ $users = $pdo->query(
 /* ── ore viitoare + produse ─────────────────────────────────── */
 $sessions = $pdo->query(
     'SELECT s.*, (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked
-     FROM class_sessions s WHERE s.starts_at >= NOW() ORDER BY s.starts_at LIMIT 50'
+     FROM class_sessions s WHERE s.starts_at >= NOW() AND s.status = "active" ORDER BY s.starts_at LIMIT 50'
+)->fetchAll();
+
+$pastSessions = $pdo->query(
+    'SELECT s.*, (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked
+     FROM class_sessions s WHERE s.starts_at < NOW() ORDER BY s.starts_at DESC LIMIT 10'
 )->fetchAll();
 
 $products = $pdo->query('SELECT * FROM products ORDER BY created_at DESC LIMIT 100')->fetchAll();
@@ -58,6 +63,8 @@ $map = [
     'err=produs-titlu' => 'Titlul produsului e prea scurt.',
     'err=produs-negasit' => 'Produsul selectat nu există.',
     'err=acces-existent' => 'Utilizatorul are deja acces la acest produs.',
+    'ok=ora-anulata' => 'Ora a fost anulată, iar înscrișii au fost anunțați pe email.',
+    'err=ora-negasita' => 'Ora nu există (sau e deja anulată).',
 ];
 $flash = null; $isErr = false;
 $qs = $_SERVER['QUERY_STRING'] ?? '';
@@ -172,7 +179,7 @@ function status_badge(array $u): string
       <h2>🗓️ Ore programate (viitoare)</h2>
       <?php if (!$sessions): ?><p class="muted">Nicio oră viitoare — creează prima mai jos.</p><?php endif; ?>
       <?php foreach ($sessions as $s): ?>
-        <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
           <div>
             <strong><?= e($s['title']) ?></strong>
             <span class="b b-pending"><?= e($grades[(int) $s['grade']] ?? '') ?></span>
@@ -180,8 +187,23 @@ function status_badge(array $u): string
               · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
               <?= $s['meet_link'] ? ' · are link' : ' · fără link încă' ?></div>
           </div>
+          <a href="/admin/ora.php?id=<?= (int) $s['id'] ?>" style="font-weight:700;color:var(--pen);text-decoration:none">Gestionează →</a>
         </div>
       <?php endforeach; ?>
+
+      <?php if ($pastSessions): ?>
+        <h2 style="margin-top:18px">Ore trecute <span class="muted" style="font-size:.85rem">(pentru prezență)</span></h2>
+        <?php foreach ($pastSessions as $s): ?>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(43,74,139,.15);flex-wrap:wrap">
+            <div>
+              <strong><?= e($s['title']) ?></strong>
+              <span class="b <?= $s['status'] === 'active' ? 'b-pending' : 'b-blocked' ?>"><?= $s['status'] === 'active' ? e($grades[(int) $s['grade']] ?? '') : 'anulată' ?></span>
+              <span class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · înscriși: <?= (int) $s['booked'] ?></span>
+            </div>
+            <a href="/admin/ora.php?id=<?= (int) $s['id'] ?>" style="font-weight:700;color:var(--pen);text-decoration:none">Prezență →</a>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
 
       <h2 style="margin-top:18px">Creează o oră</h2>
       <form method="post" action="/api/admin-session-save.php" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end">
@@ -244,6 +266,15 @@ function status_badge(array $u): string
             <button type="submit">Acordă accesul</button>
           </form>
         </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>📤 Exporturi (Excel/CSV)</h2>
+      <p class="muted" style="margin-bottom:12px">Cu diacritice corecte, separator „;" — se deschid direct în Excel.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="/api/admin-export.php?what=users"><button type="button">Utilizatori (CSV)</button></a>
+        <a href="/api/admin-export.php?what=bookings"><button type="button">Programări + prezență (CSV)</button></a>
       </div>
     </div>
 

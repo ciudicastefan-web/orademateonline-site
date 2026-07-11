@@ -106,6 +106,20 @@ try {
         $pdo->query('ALTER TABLE users ADD COLUMN blocked_at DATETIME NULL');
     }
 
+    // v4: statusul orelor (active/anulate) + prezența la ore
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'class_sessions'
+                          AND COLUMN_NAME = 'status'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query("ALTER TABLE class_sessions ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'");
+    }
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings'
+                          AND COLUMN_NAME = 'attended'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE bookings ADD COLUMN attended TINYINT(1) NULL');
+    }
+
     // folderul privat pentru fișierele materialelor (în afara public_html)
     $mat = dirname(__DIR__, 2) . '/materiale';
     if (!is_dir($mat)) {
@@ -113,7 +127,7 @@ try {
     }
 
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK (v3). Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v4). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());
