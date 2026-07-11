@@ -114,7 +114,8 @@ foreach ($map as $k => $m) {
       repeating-linear-gradient(to right,transparent,transparent calc(var(--cell) - 1px),var(--grid) calc(var(--cell) - 1px),var(--grid) var(--cell)),
       repeating-linear-gradient(to bottom,transparent,transparent calc(var(--cell) - 1px),var(--grid) calc(var(--cell) - 1px),var(--grid) var(--cell)),var(--paper)}
     body::before{content:'';position:fixed;top:0;bottom:0;left:clamp(20px,6vw,84px);width:2px;background:var(--margin-line);pointer-events:none}
-    header{width:min(1020px,94vw);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:22px 16px 0;position:relative;z-index:2}
+    header{position:sticky;top:0;z-index:40;width:100%;display:flex;justify-content:center;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(43,74,139,.1)}
+    .header-in{width:min(1020px,94vw);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:12px 16px}
     .brand{display:inline-flex;align-items:center;gap:10px;font-family:Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--ink);text-decoration:none}
     .brand em{color:var(--pen);font-style:normal}
     .brand-mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--paper)}
@@ -155,6 +156,7 @@ foreach ($map as $k => $m) {
 </head>
 <body>
   <header>
+    <div class="header-in">
     <a class="brand" href="/"><span class="brand-mark">π</span> Ora de Mate <em>Online</em></a>
     <nav>
       <a href="/">Acasă</a>
@@ -166,6 +168,7 @@ foreach ($map as $k => $m) {
         <button type="submit" class="ghost">Ieși din cont</button>
       </form>
     </nav>
+    </div>
   </header>
 
   <main>
