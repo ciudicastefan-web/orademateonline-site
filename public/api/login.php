@@ -54,4 +54,4 @@ session_boot();
 session_regenerate_id(true);
 $_SESSION['uid'] = (int) $u['id'];
 
-redirect('/cont/');
+redirect(sanitize_next($_POST['next'] ?? null));

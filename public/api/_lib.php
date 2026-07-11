@@ -81,6 +81,16 @@ function redirect(string $path): never
     exit;
 }
 
+/** Validează un URL de revenire („next”): doar căi locale, fără://, altfel /cont/. */
+function sanitize_next(?string $next): string
+{
+    $next = (string) $next;
+    if ($next !== '' && $next[0] === '/' && !str_starts_with($next, '//') && !str_contains($next, '://')) {
+        return $next;
+    }
+    return '/cont/';
+}
+
 /** Limitare de rată pe o cheie (ex. IP): max $max acțiuni pe fereastra $windowSec. */
 function throttle(string $key, int $max, int $windowSec): void
 {

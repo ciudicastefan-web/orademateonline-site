@@ -32,4 +32,5 @@ if (
 db()->prepare('UPDATE users SET email_verified_at = NOW(), verify_token_hash = NULL, verify_expires_at = NULL WHERE id = ?')
     ->execute([$uid]);
 
-redirect('/autentificare?ok=activat');
+$next = sanitize_next($_GET['next'] ?? null);
+redirect('/autentificare?ok=activat' . ($next !== '/cont/' ? '&next=' . rawurlencode($next) : ''));

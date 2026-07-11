@@ -60,7 +60,9 @@ if ($existing) {
     $uid = (int) $pdo->lastInsertId();
 }
 
-$link = BASE_URL . '/api/verify.php?uid=' . $uid . '&t=' . $token;
+$next = sanitize_next($_POST['next'] ?? null);
+$link = BASE_URL . '/api/verify.php?uid=' . $uid . '&t=' . $token
+      . ($next !== '/cont/' ? '&next=' . rawurlencode($next) : '');
 $body = "Salut, {$name}!\n\n"
       . "Mulțumim că ți-ai făcut cont la Ora de Mate Online.\n"
       . "Activează-l printr-un click pe linkul de mai jos (valabil 24 de ore):\n\n"

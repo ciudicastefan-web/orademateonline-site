@@ -14,6 +14,7 @@ import Layout from '../layouts/Layout.astro';
     <div id="flash" class="flash" hidden></div>
 
     <form class="panel reveal" style="--i: 2" method="post" action="/api/login.php">
+      <input type="hidden" name="next" id="f-next" value="" />
       <label>
         Email
         <input type="email" name="email" required maxlength="190" autocomplete="email" />
@@ -24,7 +25,7 @@ import Layout from '../layouts/Layout.astro';
       </label>
       <button type="submit">Intră în cont</button>
       <p class="alt">
-        Nu ai cont? <a href="/inregistrare">Creează unul</a>
+        Nu ai cont? <a href="/inregistrare" id="lnk-reg">Creează unul</a>
         &nbsp;·&nbsp; <a href="/resetare">Ai uitat parola?</a>
       </p>
     </form>
@@ -32,11 +33,21 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  // Dacă ești deja logat, pagina de login nu are ce să-ți arate — te duce la cont.
+  // „next” = pagina la care revii după autentificare (ex. catalogul de materiale).
+  const params = new URLSearchParams(window.location.search);
+  const rawNext = params.get('next') || '';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '';
+  if (next) {
+    (document.getElementById('f-next') as HTMLInputElement).value = next;
+    const reg = document.getElementById('lnk-reg') as HTMLAnchorElement;
+    reg.href = '/inregistrare?next=' + encodeURIComponent(next);
+  }
+
+  // Dacă ești deja logat, pagina de login nu are ce să-ți arate — te duce mai departe.
   fetch('/api/me.php', { credentials: 'same-origin' })
     .then((r) => (r.ok ? r.json() : null))
     .then((me) => {
-      if (me && me.auth) window.location.replace('/cont/');
+      if (me && me.auth) window.location.replace(next || '/cont/');
     })
     .catch(() => {});
 

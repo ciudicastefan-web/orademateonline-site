@@ -18,6 +18,7 @@ import Layout from '../layouts/Layout.astro';
     <div id="flash" class="flash" hidden></div>
 
     <form class="panel reveal" style="--i: 3" method="post" action="/api/register.php">
+      <input type="hidden" name="next" id="f-next" value="" />
       <label>
         Numele tău
         <input type="text" name="full_name" required minlength="2" maxlength="120" autocomplete="name" />
@@ -58,6 +59,24 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
+  // „next” = pagina la care revii după crearea și activarea contului.
+  const params = new URLSearchParams(window.location.search);
+  const rawNext = params.get('next') || '';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '';
+  if (next) {
+    (document.getElementById('f-next') as HTMLInputElement).value = next;
+    const alt = document.querySelector('.alt a') as HTMLAnchorElement | null;
+    if (alt) alt.href = '/autentificare?next=' + encodeURIComponent(next);
+  }
+
+  // Deja logat? N-ai ce căuta la înregistrare — mergi mai departe.
+  fetch('/api/me.php', { credentials: 'same-origin' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((me) => {
+      if (me && me.auth) window.location.replace(next || '/cont/');
+    })
+    .catch(() => {});
+
   const MSG: Record<string, [string, boolean]> = {
     'err=nume': ['Numele trebuie să aibă între 2 și 120 de caractere.', true],
     'err=email': ['Adresa de email nu pare validă.', true],

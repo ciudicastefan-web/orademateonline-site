@@ -1,7 +1,8 @@
 ---
 // Pagina „Materiale” — catalog de prezentare, public pentru toți.
-// Fiecare material: titlu, meta, preț(placeholder), buton Cumpără + buton info (ℹ)
-// care deschide un modal cu ce găsește elevul/părintele în material.
+// Fiecare material: card cu buton Cumpără + buton info (ℹ) care deschide un
+// POPOVER mic, lipit de card (nu modal peste toată pagina).
+// „Cumpără”: nelogat → login/înregistrare cu revenire aici; logat → notă „în curând”.
 // Textele din `info` sunt PLACEHOLDER — se editează pe măsură ce urcăm materialele.
 import Layout from '../layouts/Layout.astro';
 
@@ -135,7 +136,7 @@ const groups: Group[] = [
     </p>
     <p class="notice reveal" style="--i: 3">
       🛒 <strong>Magazinul se deschide în curând.</strong> Prețurile și primele titluri
-      se anunță la lansare — <a href="/inregistrare">creează-ți contul</a> ca să afli primul.
+      se anunță la lansare — <a href="/inregistrare?next=%2Fmateriale">creează-ți contul</a> ca să afli primul.
     </p>
 
     {groups.map((g, gi) => (
@@ -155,15 +156,14 @@ const groups: Group[] = [
               <div class="item-foot">
                 <span class="price">{m.price}</span>
                 <div class="actions">
-                  <button
-                    type="button"
-                    class="info-btn"
-                    data-info-title={m.title}
-                    data-info-text={m.info}
-                    aria-label={`Detalii despre ${m.title}`}
-                  >ℹ️</button>
-                  <a class="buy" href="/inregistrare">Cumpără</a>
+                  <button type="button" class="info-btn" aria-expanded="false"
+                          aria-label={`Detalii despre ${m.title}`}>ℹ️</button>
+                  <a class="buy" href="/autentificare?next=%2Fmateriale">Cumpără</a>
                 </div>
+              </div>
+              <div class="pop" hidden>
+                <p class="pop-kicker">Ce vei găsi în material</p>
+                <p class="pop-text">{m.info}</p>
               </div>
             </article>
           ))}
@@ -177,47 +177,64 @@ const groups: Group[] = [
     </aside>
   </main>
 
-  <!-- Modalul de info (unul singur, refolosit) -->
-  <div id="info-modal" class="modal" hidden>
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <button type="button" class="modal-x" data-close aria-label="Închide">×</button>
-      <p class="modal-kicker">Ce vei găsi în material</p>
-      <h2 id="modal-title"></h2>
-      <p id="modal-text"></p>
-      <div class="modal-foot">
-        <a class="buy" href="/inregistrare">Cumpără</a>
-      </div>
-    </div>
+  <!-- bulă mică pentru utilizatorii logați care apasă Cumpără înainte de lansare -->
+  <div id="buy-note" hidden>
+    🛒 Magazinul se deschide în curând — după cumpărare, materialul va apărea automat
+    la „Materialele mele”, în contul tău.
   </div>
 </Layout>
 
 <script>
-  const modal = document.getElementById('info-modal')!;
-  const titleEl = document.getElementById('modal-title')!;
-  const textEl = document.getElementById('modal-text')!;
+  /* Popover-ul de info: mic, lipit de card, câte unul deschis o dată. */
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.item'));
 
-  function openModal(title: string, text: string) {
-    titleEl.textContent = title;
-    textEl.textContent = text;
-    modal.hidden = false;
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal() {
-    modal.hidden = true;
-    document.body.style.overflow = '';
+  function closeAll() {
+    for (const it of items) {
+      (it.querySelector('.pop') as HTMLElement).hidden = true;
+      (it.querySelector('.info-btn') as HTMLElement).setAttribute('aria-expanded', 'false');
+    }
+    buyNote.hidden = true;
   }
 
-  document.querySelectorAll<HTMLButtonElement>('.info-btn').forEach((btn) => {
-    btn.addEventListener('click', () =>
-      openModal(btn.dataset.infoTitle || '', btn.dataset.infoText || '')
-    );
+  for (const it of items) {
+    const btn = it.querySelector('.info-btn') as HTMLButtonElement;
+    const pop = it.querySelector('.pop') as HTMLElement;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = pop.hidden;
+      closeAll();
+      pop.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', String(willOpen));
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('.pop')) closeAll();
   });
-  modal.querySelectorAll('[data-close]').forEach((el) =>
-    el.addEventListener('click', closeModal)
-  );
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.hidden) closeModal();
+    if (e.key === 'Escape') closeAll();
+  });
+
+  /* Butonul Cumpără: nelogat → login cu revenire aici (href-ul implicit);
+     logat → bulă informativă lângă buton, până se deschide magazinul. */
+  const buyNote = document.getElementById('buy-note') as HTMLElement;
+  let authed = false;
+  fetch('/api/me.php', { credentials: 'same-origin' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((me) => { authed = !!(me && me.auth); })
+    .catch(() => {});
+
+  document.querySelectorAll<HTMLAnchorElement>('.buy').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      if (!authed) return; // merge natural la /autentificare?next=/materiale
+      e.preventDefault();
+      e.stopPropagation();
+      closeAll();
+      const r = a.getBoundingClientRect();
+      buyNote.style.top = window.scrollY + r.bottom + 10 + 'px';
+      buyNote.style.left = Math.max(12, Math.min(window.innerWidth - 312, r.right - 300)) + 'px';
+      buyNote.hidden = false;
+    });
   });
 </script>
 
@@ -258,6 +275,7 @@ const groups: Group[] = [
   @media (min-width: 1040px) { .items { grid-template-columns: repeat(3, 1fr); } }
 
   .item {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--card);
@@ -297,11 +315,7 @@ const groups: Group[] = [
     justify-content: space-between;
     gap: 10px;
   }
-  .price {
-    font-weight: 700;
-    color: var(--pen);
-    font-size: 0.9rem;
-  }
+  .price { font-weight: 700; color: var(--pen); font-size: 0.9rem; }
   .actions { display: flex; align-items: center; gap: 8px; }
 
   .info-btn {
@@ -315,7 +329,7 @@ const groups: Group[] = [
     line-height: 1;
     transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  .info-btn:hover { border-color: var(--pen); transform: scale(1.08); }
+  .info-btn:hover, .info-btn[aria-expanded='true'] { border-color: var(--pen); transform: scale(1.08); }
 
   .buy {
     font: inherit;
@@ -330,6 +344,57 @@ const groups: Group[] = [
   }
   .buy:hover { background: var(--pen); }
 
+  /* popover-ul de info: mic, ancorat pe card, deasupra footerului cardului */
+  .pop {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: calc(100% - 8px);
+    background: var(--card);
+    border: 1.5px solid rgba(228, 87, 46, 0.35);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 14px 34px rgba(29, 46, 82, 0.18);
+    z-index: 5;
+    animation: pop-in 0.16s ease;
+  }
+  .pop::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    right: 34px;
+    width: 12px;
+    height: 12px;
+    background: var(--card);
+    border-right: 1.5px solid rgba(228, 87, 46, 0.35);
+    border-bottom: 1.5px solid rgba(228, 87, 46, 0.35);
+    transform: rotate(45deg);
+  }
+  @keyframes pop-in { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .pop-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+  .pop-text { margin-top: 8px; font-size: 0.9rem; line-height: 1.6; color: var(--ink-soft); }
+
+  #buy-note {
+    position: absolute;
+    width: 300px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    box-shadow: 0 14px 34px rgba(29, 46, 82, 0.3);
+    z-index: 60;
+    animation: pop-in 0.16s ease;
+  }
+
   .soon {
     margin-top: clamp(36px, 6vh, 52px);
     max-width: 640px;
@@ -342,31 +407,7 @@ const groups: Group[] = [
   }
   .soon a { color: var(--pen); font-weight: 700; }
 
-  /* modal */
-  .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; }
-  .modal-backdrop { position: absolute; inset: 0; background: rgba(29, 46, 82, 0.45); backdrop-filter: blur(2px); }
-  .modal-box {
-    position: relative;
-    width: min(500px, 100%);
-    background: var(--card);
-    border-radius: 16px;
-    padding: 30px 28px 26px;
-    box-shadow: 0 20px 60px rgba(29, 46, 82, 0.3);
-    animation: pop 0.2s ease;
-  }
-  @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .modal-x {
-    position: absolute; top: 12px; right: 14px;
-    width: 34px; height: 34px; border: none; background: transparent;
-    font-size: 1.6rem; line-height: 1; color: var(--ink-soft); cursor: pointer; border-radius: 8px;
-  }
-  .modal-x:hover { background: rgba(43, 74, 139, 0.08); color: var(--ink); }
-  .modal-kicker { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pen); }
-  #modal-title { margin-top: 6px; font-family: 'Fraunces Variable', serif; font-weight: 600; font-size: 1.3rem; }
-  #modal-text { margin-top: 12px; line-height: 1.7; color: var(--ink-soft); }
-  .modal-foot { margin-top: 22px; display: flex; justify-content: flex-end; }
-
   @media (prefers-reduced-motion: reduce) {
-    .item, .item:hover, .info-btn, .modal-box { transition: none; animation: none; transform: none; }
+    .item, .item:hover, .info-btn, .pop, #buy-note { transition: none; animation: none; transform: none; }
   }
 </style>
