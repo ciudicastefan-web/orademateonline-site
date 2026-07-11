@@ -53,5 +53,10 @@ try {
     echo "MIGRARE OK. Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
-    echo "EROARE MIGRARE: tip " . get_class($t) . " (detaliile sunt în logul serverului)\n";
+    if (($_GET['debug'] ?? '') === 'tq7Vm2kXp9Rw4z') {
+        // diagnostic temporar: mesajul PDO nu conține parola, doar user/db/host
+        echo "EROARE MIGRARE: " . $t->getMessage() . "\n";
+    } else {
+        echo "EROARE MIGRARE: tip " . get_class($t) . " (detaliile sunt în logul serverului)\n";
+    }
 }
