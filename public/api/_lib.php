@@ -172,6 +172,18 @@ function grade_matches(int $childGrade, int $grade, ?int $gradeMax): bool
     return $childGrade >= $grade && $childGrade <= ($gradeMax ?? $grade);
 }
 
+/** Prețul unei ore, pe înțelesul omului: „gratuit”, „50 lei”, „49,50 lei”. */
+function price_label(int $cents): string
+{
+    if ($cents <= 0) {
+        return 'gratuit';
+    }
+    if ($cents % 100 === 0) {
+        return intdiv($cents, 100) . ' lei';
+    }
+    return number_format($cents / 100, 2, ',', '.') . ' lei';
+}
+
 /** Adminii se definesc prin ADMIN_EMAILS în app_config.php (listă separată prin virgulă). */
 function is_admin(array $u): bool
 {

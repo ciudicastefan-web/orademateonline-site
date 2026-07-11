@@ -89,12 +89,44 @@ if ((int) $st->fetchColumn() >= (int) $sess['capacity']) {
     redirect($back . '?err=programare-plina');
 }
 
+// orele gratuite sunt „achitate” din start; la cele cu preț, linkul se
+// deblochează după confirmarea plății (azi manual din admin, mâine prin Stripe)
+$price = (int) ($sess['price_cents'] ?? 0);
+$paidAt = $price > 0 ? null : date('Y-m-d H:i:s');
+
 if ($existing) {
-    $pdo->prepare('UPDATE bookings SET status = "booked", user_id = ? WHERE id = ?')
-        ->execute([$u['id'], $existing['id']]);
+    // reactivare: dacă plata fusese deja făcută, o păstrăm
+    $pdo->prepare('UPDATE bookings SET status = "booked", user_id = ?, paid_at = COALESCE(paid_at, ?) WHERE id = ?')
+        ->execute([$u['id'], $paidAt, $existing['id']]);
 } else {
-    $pdo->prepare('INSERT INTO bookings (session_id, child_id, user_id) VALUES (?, ?, ?)')
-        ->execute([$sessionId, $childId, $u['id']]);
+    $pdo->prepare('INSERT INTO bookings (session_id, child_id, user_id, paid_at) VALUES (?, ?, ?, ?)')
+        ->execute([$sessionId, $childId, $u['id'], $paidAt]);
+}
+
+if ($price > 0) {
+    $when = date('d.m.Y, H:i', strtotime((string) $sess['starts_at']));
+    send_app_mail(
+        (string) $u['email'],
+        'Loc rezervat — ' . $sess['title'],
+        "Am rezervat locul pentru ora „{$sess['title']}” din {$when}.\n\n"
+        . 'Cost: ' . price_label($price) . " / elev.\n"
+        . "Te contactăm în scurt timp cu detaliile de plată; după confirmare, "
+        . "linkul de conectare apare în contul tău.\n\n" . BASE_URL . '/cont/'
+    );
+    if (defined('ADMIN_EMAILS')) {
+        foreach (array_map('trim', explode(',', ADMIN_EMAILS)) as $adminEmail) {
+            if ($adminEmail !== '') {
+                send_app_mail(
+                    $adminEmail,
+                    'Rezervare de încasat — ' . $sess['title'],
+                    "{$u['full_name']} ({$u['email']}) a rezervat un loc la „{$sess['title']}” din {$when} — "
+                    . price_label($price) . ".\n\nDupă ce încasezi banii, confirmă plata de aici:\n"
+                    . BASE_URL . '/admin/ora.php?id=' . $sessionId
+                );
+            }
+        }
+    }
+    redirect($back . '?ok=programat-plata');
 }
 
 redirect($back . '?ok=programat');

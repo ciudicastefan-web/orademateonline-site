@@ -123,6 +123,14 @@ import Layout from '../layouts/Layout.astro';
   const gradeLabel = (s: any): string =>
     isMix(s) ? `Clasele ${ROMAN[s.grade]}–${ROMAN[gradeMax(s)]} (mix)` : (GRADES[s.grade] ?? '');
 
+  /* prețul orei: „gratuit”, „50 lei”, „49,50 lei” — linkul de conectare se
+     deblochează după confirmarea plății (orele gratuite îl au din start) */
+  const priceLabel = (cents: number): string => {
+    if (!cents || cents <= 0) return 'gratuit';
+    if (cents % 100 === 0) return `${cents / 100} lei`;
+    return `${(cents / 100).toFixed(2).replace('.', ',')} lei`;
+  };
+
   const root = document.getElementById('cal-root')!;
 
   function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -139,6 +147,7 @@ import Layout from '../layouts/Layout.astro';
   /* mesajele după înscriere (venim înapoi aici cu ?ok= / ?err=) */
   const FLASH: Record<string, [string, boolean]> = {
     'ok=programat': ['Programare făcută! Linkul orei apare pe cardul ei și în contul tău.', false],
+    'ok=programat-plata': ['Loc rezervat! Te contactăm pe email cu detaliile de plată — după confirmare, linkul orei apare aici și în cont.', false],
     'err=programare-plina': ['Ne pare rău, ora s-a umplut între timp.', true],
     'err=programare-dubla': ['Elevul e deja înscris la această oră.', true],
     'err=programare-clasa': ['Ora aleasă e pentru altă clasă decât a elevului.', true],
@@ -246,12 +255,20 @@ import Layout from '../layouts/Layout.astro';
         card.append(el('div', 'cal-time', `${String(s.starts_at).slice(11, 16)} · ${s.duration} min`));
         card.append(el('div', 'cal-title', String(s.title)));
 
+        const awaitingPay = enrolled && (s.unpaid_children || []).length > 0 && !s.meet_link;
+
         const meta = el('div', 'cal-meta');
         meta.append(el('span', 'cal-pill grade', gradeLabel(s)));
-        if (enrolled) meta.append(el('span', 'cal-pill ok', 'înscris ✓'));
+        meta.append(el('span', 'cal-pill price', priceLabel(s.price_cents)));
+        if (awaitingPay) meta.append(el('span', 'cal-pill full', 'rezervat · de achitat'));
+        else if (enrolled) meta.append(el('span', 'cal-pill ok', 'înscris ✓'));
         else if (full) meta.append(el('span', 'cal-pill full', 'complet'));
         else meta.append(el('span', 'cal-pill', `${s.free} ${s.free === 1 ? 'loc liber' : 'locuri libere'}`));
         card.append(meta);
+
+        if (awaitingPay) {
+          card.append(el('div', 'cal-hint', 'îți confirmăm plata pe email — apoi primești linkul orei'));
+        }
 
         if (enrolled && s.meet_link) {
           const join = el('a', 'cal-join', 'Intră la oră →');
@@ -267,9 +284,11 @@ import Layout from '../layouts/Layout.astro';
           const h1 = el('input'); h1.type = 'hidden'; h1.name = 'session_id'; h1.value = String(s.id);
           const h2 = el('input'); h2.type = 'hidden'; h2.name = 'back'; h2.value = '/cursuri';
           form.append(h1, h2);
+          const paid = s.price_cents > 0;
           if (matching.length === 1) {
             const h3 = el('input'); h3.type = 'hidden'; h3.name = 'child_id'; h3.value = String(matching[0].id);
-            form.append(h3, el('button', '', `Înscrie-l pe ${matching[0].name}`));
+            form.append(h3, el('button', '',
+              paid ? `Rezervă pentru ${matching[0].name} — ${priceLabel(s.price_cents)}` : `Înscrie-l pe ${matching[0].name}`));
           } else {
             const sel = el('select'); sel.name = 'child_id';
             for (const c of matching) {
@@ -277,7 +296,7 @@ import Layout from '../layouts/Layout.astro';
               opt.value = String(c.id);
               sel.append(opt);
             }
-            form.append(sel, el('button', '', 'Înscrie'));
+            form.append(sel, el('button', '', paid ? `Rezervă — ${priceLabel(s.price_cents)}` : 'Înscrie'));
           }
           card.append(form);
         }
@@ -316,7 +335,8 @@ import Layout from '../layouts/Layout.astro';
           } else {
             form.append(el('div', 'cal-add-note', `Îl trecem automat la ${GRADES[s.grade] ?? 'clasa orei'}.`));
           }
-          form.append(el('button', '', 'Adaugă elevul și înscrie-l'));
+          form.append(el('button', '',
+            s.price_cents > 0 ? `Adaugă elevul și rezervă — ${priceLabel(s.price_cents)}` : 'Adaugă elevul și înscrie-l'));
           det.append(form);
           card.append(det);
         }
@@ -663,6 +683,11 @@ import Layout from '../layouts/Layout.astro';
   .cal-sec :global(.cal-pill.full) {
     background: rgba(29, 46, 82, 0.12);
     color: var(--ink);
+  }
+
+  .cal-sec :global(.cal-pill.price) {
+    background: rgba(46, 139, 87, 0.12);
+    color: #1e5c38;
   }
 
   .cal-sec :global(.cal-join) {

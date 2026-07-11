@@ -33,7 +33,7 @@ $purchases = $st->fetchAll();
 
 // programările viitoare (cu link de întâlnire) + istoricul
 $st = $pdo->prepare(
-    'SELECT b.id AS booking_id, s.title, s.starts_at, s.duration_min, s.meet_link, c.first_name
+    'SELECT b.id AS booking_id, b.paid_at, s.title, s.starts_at, s.duration_min, s.meet_link, s.price_cents, c.first_name
      FROM bookings b
      JOIN class_sessions s ON s.id = b.session_id
      JOIN children c ON c.id = b.child_id
@@ -81,6 +81,7 @@ function ro_dt(string $dt, array $months): string {
 $map = [
     'ok=copil' => 'Profilul elevului a fost adăugat.', 'ok=copil-sters' => 'Profilul a fost șters.',
     'ok=profil' => 'Datele tale au fost actualizate.', 'ok=programat' => 'Programare făcută! Linkul orei apare mai jos, la „Programările viitoare”.',
+    'ok=programat-plata' => 'Loc rezervat! Te contactăm pe email cu detaliile de plată — după confirmare, linkul orei apare mai jos.',
     'ok=anulat' => 'Programarea a fost anulată.',
     'err=copil-nume' => 'Prenumele elevului trebuie să aibă între 2 și 80 de caractere.',
     'err=copil-clasa' => 'Alege clasa elevului.', 'err=copil-limita' => 'Ai atins numărul maxim de profiluri (6).',
@@ -198,8 +199,13 @@ foreach ($map as $k => $m) {
         <div class="row">
           <div>
             <span class="who"><?= e($b['title']) ?></span> <span class="pill"><?= e($b['first_name']) ?></span>
+            <?php if ((int) ($b['price_cents'] ?? 0) > 0): ?>
+              <?php if ($b['paid_at'] !== null): ?><span class="pill free">plătit ✓</span>
+              <?php else: ?><span class="pill full">de achitat — <?= e(price_label((int) $b['price_cents'])) ?></span><?php endif; ?>
+            <?php endif; ?>
             <div class="meta"><?= e(ro_dt((string) $b['starts_at'], $months)) ?> · <?= (int) $b['duration_min'] ?> min
-              <?php if ($b['meet_link']): ?> · <a class="joinlink" href="<?= e((string) $b['meet_link']) ?>" rel="noopener">Intră la oră →</a><?php endif; ?>
+              <?php if ($b['meet_link'] && $b['paid_at'] !== null): ?> · <a class="joinlink" href="<?= e((string) $b['meet_link']) ?>" rel="noopener">Intră la oră →</a>
+              <?php elseif ((int) ($b['price_cents'] ?? 0) > 0 && $b['paid_at'] === null): ?> · linkul apare după confirmarea plății<?php endif; ?>
             </div>
           </div>
           <form method="post" action="/api/booking-cancel.php" onsubmit="return confirm('Anulezi programarea?')">
@@ -208,7 +214,10 @@ foreach ($map as $k => $m) {
           </form>
         </div>
       <?php endforeach; ?>
-      <p class="muted" style="margin-top:10px">Anularea sau mutarea la altă oră se face cu cel puțin 24 de ore înainte.</p>
+      <p class="muted" style="margin-top:10px">Anularea sau mutarea la altă oră se face cu cel puțin 24 de ore înainte.
+        <?php foreach ($upcoming as $b) { if ((int) ($b['price_cents'] ?? 0) > 0 && $b['paid_at'] === null) {
+          echo 'Pentru orele rezervate, te contactăm pe email cu detaliile de plată — plata cu cardul e în lucru.'; break; } } ?>
+      </p>
     </section>
     <?php endif; ?>
 
@@ -285,6 +294,7 @@ foreach ($map as $k => $m) {
             <div>
               <span class="who"><?= e($s['title']) ?></span>
               <div class="meta"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min ·
+                <?= e(price_label((int) ($s['price_cents'] ?? 0))) ?> ·
                 <?php if ((int) $s['mine'] > 0): ?><span class="pill free">înscris ✓</span>
                 <?php elseif ($left <= 0): ?><span class="pill full">complet</span>
                 <?php else: ?><span class="pill"><?= $left ?> locuri libere</span><?php endif; ?>

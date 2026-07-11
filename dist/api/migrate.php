@@ -140,6 +140,24 @@ try {
         $pdo->query('ALTER TABLE class_sessions ADD COLUMN grade_max TINYINT UNSIGNED NULL');
     }
 
+    // v7: preț pe elev la ore + starea plății pe programări (linkul orei se
+    // deblochează după plată; azi confirmată manual, mâine de Stripe)
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'class_sessions'
+                          AND COLUMN_NAME = 'price_cents'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE class_sessions ADD COLUMN price_cents INT UNSIGNED NOT NULL DEFAULT 0');
+    }
+    $col = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings'
+                          AND COLUMN_NAME = 'paid_at'")->fetchColumn();
+    if ((int) $col === 0) {
+        $pdo->query('ALTER TABLE bookings ADD COLUMN paid_at DATETIME NULL');
+        // programările făcute până acum au fost la ore gratuite — le marcăm achitate,
+        // ca linkurile lor să rămână vizibile (rulează O SINGURĂ dată, la crearea coloanei)
+        $pdo->query('UPDATE bookings SET paid_at = created_at WHERE paid_at IS NULL');
+    }
+
     // folderul privat pentru fișierele materialelor (în afara public_html)
     $mat = dirname(__DIR__, 2) . '/materiale';
     if (!is_dir($mat)) {
@@ -147,7 +165,7 @@ try {
     }
 
     $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    echo "MIGRARE OK (v6). Tabele existente: " . implode(', ', $tables) . "\n";
+    echo "MIGRARE OK (v7). Tabele existente: " . implode(', ', $tables) . "\n";
 } catch (Throwable $t) {
     http_response_code(500);
     error_log('[migrate] ' . $t->getMessage());

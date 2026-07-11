@@ -179,6 +179,7 @@ function status_badge(array $u): string
     .cal-pill.nolink{background:rgba(43,74,139,.08);font-style:italic}
     .cal-pill.clash{background:#c62828;color:#fff}
     .cal-pill.full{background:rgba(29,46,82,.12);color:var(--ink)}
+    .cal-pill.price{background:rgba(46,139,87,.12);color:#1e5c38}
     .clash-note{margin-bottom:10px;padding:10px 14px;border-radius:8px;background:rgba(198,40,40,.08);border:1.5px solid rgba(198,40,40,.4);color:#8e1c1c;font-weight:700;font-size:.9rem}
     footer{padding:20px;font-size:.85rem;color:var(--ink-soft)}
     @media(max-width:760px){ .hide-sm{display:none} }
@@ -249,6 +250,7 @@ function status_badge(array $u): string
               <div class="cal-meta">
                 <span class="cal-pill grade"><?= e(grade_label((int) $s['grade'], $s['grade_max'] !== null ? (int) $s['grade_max'] : null)) ?></span>
                 <span class="cal-pill<?= (int) $s['booked'] >= (int) $s['capacity'] ? ' full' : '' ?>"><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?> înscriși</span>
+                <?php if ((int) ($s['price_cents'] ?? 0) > 0): ?><span class="cal-pill price"><?= e(price_label((int) $s['price_cents'])) ?></span><?php endif; ?>
                 <?php if (!$s['meet_link']): ?><span class="cal-pill nolink">fără link</span><?php endif; ?>
                 <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
               </div>
@@ -268,6 +270,7 @@ function status_badge(array $u): string
               <span class="b b-pending"><?= e(grade_label((int) $s['grade'], $s['grade_max'] !== null ? (int) $s['grade_max'] : null)) ?></span>
               <?php if ($clash): ?><span class="cal-pill clash">⚠ suprapunere</span><?php endif; ?>
               <div class="muted"><?= e(ro_dt((string) $s['starts_at'], $months)) ?> · <?= (int) $s['duration_min'] ?> min
+                · <?= e(price_label((int) ($s['price_cents'] ?? 0))) ?>
                 · înscriși: <strong><?= (int) $s['booked'] ?>/<?= (int) $s['capacity'] ?></strong>
                 <?= $s['meet_link'] ? ' · are link' : ' · fără link încă' ?></div>
             </div>
@@ -311,9 +314,12 @@ function status_badge(array $u): string
         <label>Ora <input type="time" name="time" required /></label>
         <label>Durata (min) <input type="number" name="duration" value="60" min="15" max="240" /></label>
         <label>Locuri <input type="number" name="capacity" value="8" min="1" max="30" /></label>
-        <label style="grid-column:1/-1">Link întâlnire (Zoom/Meet — opțional, îl văd doar cei înscriși)
+        <label>Preț / elev (lei) <input type="text" name="price_lei" value="0" inputmode="decimal" /></label>
+        <label style="grid-column:1/-1">Link întâlnire (Zoom/Meet — opțional, îl văd doar cei înscriși cu plata confirmată)
           <input type="url" name="meet_link" placeholder="https://..." />
         </label>
+        <p class="muted" style="grid-column:1/-1;margin:0">💡 Preț 0 = oră gratuită (linkul se dă imediat).
+          La orele cu preț, locul se rezervă, iar linkul se deblochează după ce confirmi plata din pagina orei.</p>
         <div><button type="submit">Creează ora</button></div>
       </form>
     </div>

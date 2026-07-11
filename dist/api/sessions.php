@@ -27,7 +27,7 @@ $children = array_map(static fn ($c) => [
 ], $st->fetchAll());
 
 $st = $pdo->prepare(
-    'SELECT s.id, s.title, s.grade, s.grade_max, s.starts_at, s.duration_min, s.capacity, s.meet_link,
+    'SELECT s.id, s.title, s.grade, s.grade_max, s.starts_at, s.duration_min, s.capacity, s.meet_link, s.price_cents,
        (SELECT COUNT(*) FROM bookings b WHERE b.session_id = s.id AND b.status = "booked") AS booked
      FROM class_sessions s
      WHERE s.status = "active" AND s.starts_at >= NOW()
@@ -41,19 +41,25 @@ $sessions = $st->fetchAll();
 $myBookings = [];
 if ($children) {
     $st = $pdo->prepare(
-        'SELECT b.session_id, b.child_id FROM bookings b
+        'SELECT b.session_id, b.child_id, b.paid_at FROM bookings b
          WHERE b.user_id = ? AND b.status = "booked"'
     );
     $st->execute([$u['id']]);
     foreach ($st->fetchAll() as $b) {
-        $myBookings[(int) $b['session_id']][] = (int) $b['child_id'];
+        $myBookings[(int) $b['session_id']][] = ['child' => (int) $b['child_id'], 'paid' => $b['paid_at'] !== null];
     }
 }
 
 $out = [];
 foreach ($sessions as $s) {
     $id = (int) $s['id'];
-    $enrolled = $myBookings[$id] ?? [];
+    $mine = $myBookings[$id] ?? [];
+    $enrolled = array_values(array_map(static fn ($m) => $m['child'], $mine));
+    $unpaid = array_values(array_map(
+        static fn ($m) => $m['child'],
+        array_filter($mine, static fn ($m) => !$m['paid'])
+    ));
+    $hasPaid = count($unpaid) < count($mine);
     $out[] = [
         'id' => $id,
         'title' => $s['title'],
@@ -64,9 +70,11 @@ foreach ($sessions as $s) {
         'capacity' => (int) $s['capacity'],
         'booked' => (int) $s['booked'],
         'free' => max(0, (int) $s['capacity'] - (int) $s['booked']),
+        'price_cents' => (int) ($s['price_cents'] ?? 0),
         'enrolled_children' => $enrolled,
-        // linkul orei se dă doar celor înscriși
-        'meet_link' => $enrolled ? $s['meet_link'] : null,
+        'unpaid_children' => $unpaid,
+        // linkul orei se dă doar celor înscriși cu plata confirmată (gratuitele sunt marcate plătite din start)
+        'meet_link' => $hasPaid ? $s['meet_link'] : null,
     ];
 }
 

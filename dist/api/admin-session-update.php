@@ -21,6 +21,8 @@ $title = trim($_POST['title'] ?? '');
 $duration = max(15, min(240, (int) ($_POST['duration'] ?? 60)));
 $capacity = max(1, min(30, (int) ($_POST['capacity'] ?? 8)));
 $meetLink = trim($_POST['meet_link'] ?? '');
+$priceLei = (float) str_replace(',', '.', (string) ($_POST['price_lei'] ?? '0'));
+$priceCents = max(0, (int) round($priceLei * 100));
 $startsAt = strtotime(trim($_POST['date'] ?? '') . ' ' . trim($_POST['time'] ?? ''));
 
 $back = '/admin/ora.php?id=' . $id;
@@ -32,8 +34,8 @@ if ($meetLink !== '' && !filter_var($meetLink, FILTER_VALIDATE_URL)) {
     redirect($back . '&err=ora-link');
 }
 
-db()->prepare('UPDATE class_sessions SET title = ?, grade = ?, grade_max = ?, starts_at = ?, duration_min = ?, capacity = ?, meet_link = ? WHERE id = ?')
-    ->execute([$title, $grade, $gradeMax, date('Y-m-d H:i:s', $startsAt), $duration, $capacity, $meetLink !== '' ? $meetLink : null, $id]);
+db()->prepare('UPDATE class_sessions SET title = ?, grade = ?, grade_max = ?, starts_at = ?, duration_min = ?, capacity = ?, meet_link = ?, price_cents = ? WHERE id = ?')
+    ->execute([$title, $grade, $gradeMax, date('Y-m-d H:i:s', $startsAt), $duration, $capacity, $meetLink !== '' ? $meetLink : null, $priceCents, $id]);
 
 // anunțăm părinții doar dacă s-a schimbat ceva relevant pentru ei
 $relevantChange = $old['title'] !== $title

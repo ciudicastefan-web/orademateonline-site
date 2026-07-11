@@ -17,7 +17,7 @@ if (!$sess) {
 }
 
 $st = $pdo->prepare(
-    'SELECT b.id AS booking_id, b.status, b.attended, c.first_name, c.grade, u.full_name, u.email
+    'SELECT b.id AS booking_id, b.status, b.attended, b.paid_at, c.first_name, c.grade, u.full_name, u.email
      FROM bookings b
      JOIN children c ON c.id = b.child_id
      JOIN users u ON u.id = b.user_id
@@ -35,6 +35,7 @@ $isCancelled = $sess['status'] !== 'active';
 
 $map = [
     'ok=ora-editata' => 'Ora a fost actualizată.',
+    'ok=plata-confirmata' => 'Plata a fost confirmată — părintele a primit emailul cu linkul orei.',
     'ok=anunt-trimis' => 'Anunțul a plecat pe email.',
     'ok=prezenta-salvata' => 'Prezența a fost salvată — părinții o văd în istoricul din cont.',
     'err=ora-invalida' => 'Verifică titlul, clasa și data orei.',
@@ -113,6 +114,7 @@ foreach ($map as $k => $m) {
     <p class="sub">
       <?= e(grade_label((int) $sess['grade'], $sess['grade_max'] !== null ? (int) $sess['grade_max'] : null)) ?> ·
       <?= e(date('d.m.Y, H:i', $startsTs)) ?> · <?= (int) $sess['duration_min'] ?> min ·
+      <?= e(price_label((int) ($sess['price_cents'] ?? 0))) ?> ·
       înscriși: <?= count($booked) ?>/<?= (int) $sess['capacity'] ?>
     </p>
 
@@ -149,6 +151,9 @@ foreach ($map as $k => $m) {
         <label>Ora <input type="time" name="time" required value="<?= e(date('H:i', $startsTs)) ?>" /></label>
         <label>Durata (min) <input type="number" name="duration" value="<?= (int) $sess['duration_min'] ?>" min="15" max="240" /></label>
         <label>Locuri <input type="number" name="capacity" value="<?= (int) $sess['capacity'] ?>" min="1" max="30" /></label>
+        <?php $priceCents = (int) ($sess['price_cents'] ?? 0);
+              $priceVal = $priceCents % 100 === 0 ? (string) intdiv($priceCents, 100) : number_format($priceCents / 100, 2, ',', ''); ?>
+        <label>Preț / elev (lei) <input type="text" name="price_lei" value="<?= e($priceVal) ?>" inputmode="decimal" /></label>
         <label class="full">Link întâlnire <input type="url" name="meet_link" value="<?= e((string) ($sess['meet_link'] ?? '')) ?>" placeholder="https://..." /></label>
         <div><button type="submit">Salvează modificările</button></div>
       </form>
@@ -164,6 +169,43 @@ foreach ($map as $k => $m) {
         </label>
         <div><button type="submit">Trimite anunțul</button></div>
       </form>
+    </div>
+    <?php endif; ?>
+
+    <?php if ((int) ($sess['price_cents'] ?? 0) > 0): ?>
+    <div class="panel">
+      <h2>💳 Plăți <span class="muted">(linkul orei se deblochează abia după confirmarea plății)</span></h2>
+      <?php if (!$booked): ?>
+        <p class="muted">Nicio rezervare încă.</p>
+      <?php else: ?>
+      <table>
+        <thead><tr><th>Elev</th><th>Părinte</th><th>Stare</th><th></th></tr></thead>
+        <tbody>
+          <?php foreach ($booked as $b): ?>
+          <tr>
+            <td><strong><?= e($b['first_name']) ?></strong></td>
+            <td><?= e($b['full_name']) ?> <span class="muted"><?= e($b['email']) ?></span></td>
+            <td>
+              <?php if ($b['paid_at'] !== null): ?>
+                <span class="b b-ok">✓ plătit (<?= e(date('d.m.Y', strtotime((string) $b['paid_at']))) ?>)</span>
+              <?php else: ?>
+                <span class="b b-off">de achitat — <?= e(price_label((int) $sess['price_cents'])) ?></span>
+              <?php endif; ?>
+            </td>
+            <td>
+              <?php if ($b['paid_at'] === null): ?>
+              <form method="post" action="/api/admin-booking-paid.php"
+                    onsubmit="return confirm('Confirmi că ai încasat plata de la <?= e($b['email']) ?>? Părintele primește emailul cu linkul orei.')">
+                <input type="hidden" name="booking_id" value="<?= (int) $b['booking_id'] ?>" />
+                <button type="submit">Confirmă plata</button>
+              </form>
+              <?php endif; ?>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+      <?php endif; ?>
     </div>
     <?php endif; ?>
 
