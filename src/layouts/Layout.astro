@@ -49,10 +49,24 @@ const nav = [
             {item.label}
           </a>
         ))}
+        <a href="/admin/" id="admin-link" class="admin-link" hidden>⚙ Admin</a>
       </nav>
     </header>
 
     <slot />
+
+    <script>
+      // Dezvăluie butonul de admin doar pentru adminii logați (răspunsul vine de la
+      // server, pe baza sesiunii — pagina statică rămâne identică pentru toți ceilalți).
+      fetch('/api/me.php', { credentials: 'same-origin' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((me) => {
+          if (me && me.auth && me.admin) {
+            document.getElementById('admin-link')?.removeAttribute('hidden');
+          }
+        })
+        .catch(() => {});
+    </script>
 
     <footer>
       <nav class="legal" aria-label="Pagini legale">
@@ -212,6 +226,16 @@ const nav = [
   nav a[aria-current='page'] {
     color: var(--pen);
     background: rgba(228, 87, 46, 0.09);
+  }
+
+  nav a.admin-link {
+    color: var(--paper);
+    background: var(--pen);
+  }
+
+  nav a.admin-link:hover {
+    background: var(--ink);
+    color: var(--paper);
   }
 
   footer {

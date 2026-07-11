@@ -90,6 +90,9 @@ foreach ($map as $k => $msg) {
     <nav>
       <a href="/">Acasă</a>
       <a href="/cursuri">Cursuri</a>
+      <?php if (is_admin($u)): ?>
+        <a href="/admin/" style="background:var(--pen);color:var(--paper);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.95rem;text-decoration:none">⚙ Admin</a>
+      <?php endif; ?>
       <form method="post" action="/api/logout.php" style="display:inline">
         <button type="submit" class="ghost">Ieși din cont</button>
       </form>
