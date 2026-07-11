@@ -1,169 +1,372 @@
 ---
-// Pagina „Materiale” — viitoarea vitrină a magazinului de conținut digital.
-// Până la lansarea vânzărilor: prezintă categoriile reale în pregătire + CTA cont.
+// Pagina „Materiale” — catalog de prezentare, public pentru toți.
+// Fiecare material: titlu, meta, preț(placeholder), buton Cumpără + buton info (ℹ)
+// care deschide un modal cu ce găsește elevul/părintele în material.
+// Textele din `info` sunt PLACEHOLDER — se editează pe măsură ce urcăm materialele.
 import Layout from '../layouts/Layout.astro';
 
-const categories = [
+type Material = {
+  id: string;
+  title: string;
+  meta: string;
+  price: string;
+  tags: string[];
+  info: string;
+};
+
+type Group = { key: string; label: string; note?: string; items: Material[] };
+
+const groups: Group[] = [
   {
-    icon: '✔',
-    title: 'Teste cu rezolvări complete',
-    desc: 'Teste pe capitole și pe clase — fiecare cerință cu rezolvarea completă, pas cu pas, ca să înțeleagă, nu doar să verifice rezultatul.',
+    key: 'gimnaziu',
+    label: 'Gimnaziu (clasele V–VIII)',
+    note: 'Teste, exemple și teorie pe fiecare clasă și capitol.',
+    items: [
+      {
+        id: 'g5-teste',
+        title: 'Teste rezolvate — Clasa a V-a',
+        meta: 'PDF · teste pe capitole · rezolvări complete',
+        price: 'în curând',
+        tags: ['Clasa a V-a', 'Teste'],
+        info: 'Culegere de teste pe capitolele clasei a V-a (numere naturale, fracții, unități de măsură, geometrie de bază), fiecare cu barem și rezolvare completă pas cu pas. Ideal pentru pregătirea tezelor și verificarea temelor acasă. (Text de prezentare provizoriu — se completează la încărcarea materialului.)',
+      },
+      {
+        id: 'g6-exemple',
+        title: 'Exemple rezolvate pas cu pas — Clasa a VI-a',
+        meta: 'PDF · probleme-tip explicate',
+        price: 'în curând',
+        tags: ['Clasa a VI-a', 'Exemple'],
+        info: 'Probleme-tip din programa clasei a VI-a (rapoarte și proporții, numere întregi, unghiuri), fiecare explicată ca la oră: ce se cere, de unde pornești, cum gândești fiecare pas. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'g7-teorie',
+        title: 'Teorie pe scurt — Clasa a VII-a',
+        meta: 'PDF · fișe de sinteză',
+        price: 'în curând',
+        tags: ['Clasa a VII-a', 'Teorie'],
+        info: 'Fișe de sinteză cu formulele și regulile esențiale ale clasei a VII-a (calcul algebric, teorema lui Pitagora, arii) — de pus lângă caiet la teme și înainte de teste. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'g8-teste',
+        title: 'Teste rezolvate — Clasa a VIII-a',
+        meta: 'PDF · pe capitole · rezolvări complete',
+        price: 'în curând',
+        tags: ['Clasa a VIII-a', 'Teste'],
+        info: 'Teste pe capitolele clasei a VIII-a, cu rezolvări detaliate — o pregătire solidă și pentru materia curentă, și ca punte spre Evaluarea Națională. (Text de prezentare provizoriu.)',
+      },
+    ],
   },
   {
-    icon: '➗',
-    title: 'Exemple rezolvate pas cu pas',
-    desc: 'Probleme-tip explicate ca la oră: ce se cere, de unde pornești, cum gândești fiecare pas. Modelul după care copilul rezolvă apoi singur.',
+    key: 'evaluare',
+    label: 'Evaluarea Națională & trecerea în clasa a IX-a',
+    note: 'Pentru clasa a VIII-a: recapitulare, modele de subiecte, admitere la liceu.',
+    items: [
+      {
+        id: 'en-modele',
+        title: 'Modele de subiecte — Evaluarea Națională',
+        meta: 'PDF · pe structura oficială · rezolvări',
+        price: 'în curând',
+        tags: ['Clasa a VIII-a', 'Evaluarea Națională'],
+        info: 'Variante de subiecte construite pe structura oficială a Evaluării Naționale, cu rezolvări complete și barem — pentru antrenament în condiții cât mai apropiate de examen. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'en-recap',
+        title: 'Recapitulare completă gimnaziu',
+        meta: 'PDF · toată materia de EN, condensată',
+        price: 'în curând',
+        tags: ['Clasa a VIII-a', 'Recapitulare'],
+        info: 'Sinteza întregii materii de gimnaziu relevante pentru Evaluarea Națională, organizată pe capitole, cu exemple rezolvate — pentru recapitularea de dinaintea examenului. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'en-punte',
+        title: 'Puntea spre clasa a IX-a',
+        meta: 'PDF · ce trebuie să știe înainte de liceu',
+        price: 'în curând',
+        tags: ['Trecere VIII → IX', 'Admitere'],
+        info: 'Ce concepte de gimnaziu se folosesc din prima în clasa a IX-a și cum arată saltul spre matematica de liceu — pentru un start fără goluri. (Text de prezentare provizoriu.)',
+      },
+    ],
   },
   {
-    icon: '📐',
-    title: 'Teorie pe scurt',
-    desc: 'Fișe de sinteză cu formulele și regulile esențiale ale fiecărui capitol — de pus lângă caiet la teme și înainte de teste.',
-  },
-  {
-    icon: '🎯',
-    title: 'Pregătire Evaluarea Națională',
-    desc: 'Materiale țintite pe structura subiectelor de la Evaluarea Națională — pentru clasa a VIII-a și pentru cei care se pregătesc din timp.',
-  },
-  {
-    icon: '🎓',
-    title: 'Pregătire Bacalaureat',
-    desc: 'Teste și sinteze pe programa de BAC, cu rezolvări detaliate — pentru toate profilurile.',
-  },
-  {
-    icon: '🏫',
-    title: 'Pe clasa copilului tău',
-    desc: 'Materialele sunt organizate pe clase, de la gimnaziu la liceu — cumperi exact ce i se potrivește, fără pachete umflate.',
+    key: 'liceu',
+    label: 'Liceu & Bacalaureat',
+    note: 'Pe programa de liceu, cu sinteze și teste pentru BAC.',
+    items: [
+      {
+        id: 'l9-teorie',
+        title: 'Teorie + exemple — Clasa a IX-a',
+        meta: 'PDF · mulțimi, funcții, trigonometrie',
+        price: 'în curând',
+        tags: ['Clasa a IX-a', 'Teorie'],
+        info: 'Teoria esențială a clasei a IX-a cu exemple rezolvate — pentru saltul de la gimnaziu la rigoarea liceului. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'bac-modele',
+        title: 'Modele de subiecte — Bacalaureat',
+        meta: 'PDF · pe profiluri · rezolvări detaliate',
+        price: 'în curând',
+        tags: ['Bacalaureat', 'Teste'],
+        info: 'Variante de subiecte pe structura probei de matematică la BAC, cu rezolvări detaliate — pentru toate profilurile. Materialele indică profilul căruia i se adresează. (Text de prezentare provizoriu.)',
+      },
+      {
+        id: 'bac-sinteze',
+        title: 'Sinteze pentru Bacalaureat',
+        meta: 'PDF · formulele care pică la examen',
+        price: 'în curând',
+        tags: ['Bacalaureat', 'Teorie'],
+        info: 'Formularul complet de care ai nevoie la BAC, condensat pe capitole, cu exemplul-tip pentru fiecare formulă. (Text de prezentare provizoriu.)',
+      },
+    ],
   },
 ];
 ---
 
 <Layout
   title="Materiale digitale — Ora de Mate Online"
-  description="Teste cu rezolvări complete, exemple pas cu pas, teorie pe scurt, pregătire pentru Evaluarea Națională și BAC — PDF-uri descărcabile, pe clase."
+  description="Catalog de materiale digitale de matematică: teste cu rezolvări, exemple pas cu pas, teorie, Evaluarea Națională și Bacalaureat, pe clase. PDF descărcabile."
 >
   <main>
     <p class="kicker reveal" style="--i: 0">Materiale digitale</p>
-    <h1 class="reveal" style="--i: 1">Matematica rezolvată, <br />explicată, descărcabilă.</h1>
+    <h1 class="reveal" style="--i: 1">Catalogul de materiale</h1>
     <p class="lead reveal" style="--i: 2">
-      PDF-uri create de profesoară, pe clase și pe capitole: teste cu rezolvări
-      complete, exemple lucrate pas cu pas și teoria esențială — pe care copilul
-      le descarcă din contul tău și le folosește oricând, în ritmul lui.
+      Teste cu rezolvări complete, exemple lucrate pas cu pas și teorie pe scurt —
+      în format PDF, organizate pe clase, de la gimnaziu la Bacalaureat. Apasă pe
+      <strong>ℹ️</strong> la orice material ca să vezi exact ce conține.
+    </p>
+    <p class="notice reveal" style="--i: 3">
+      🛒 <strong>Magazinul se deschide în curând.</strong> Prețurile și primele titluri
+      se anunță la lansare — <a href="/inregistrare">creează-ți contul</a> ca să afli primul.
     </p>
 
-    <div class="cats">
-      {categories.map((c, i) => (
-        <article class="cat reveal" style={`--i: ${i + 3}`}>
-          <span class="cat-icon" aria-hidden="true">{c.icon}</span>
-          <h2>{c.title}</h2>
-          <p>{c.desc}</p>
-        </article>
-      ))}
-    </div>
+    {groups.map((g, gi) => (
+      <section class="group reveal" style={`--i: ${gi + 4}`} aria-label={g.label}>
+        <div class="group-head">
+          <h2>{g.label}</h2>
+          {g.note && <p>{g.note}</p>}
+        </div>
+        <div class="items">
+          {g.items.map((m) => (
+            <article class="item">
+              <div class="item-tags">
+                {m.tags.map((t) => <span class="tag">{t}</span>)}
+              </div>
+              <h3>{m.title}</h3>
+              <p class="item-meta">{m.meta}</p>
+              <div class="item-foot">
+                <span class="price">{m.price}</span>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="info-btn"
+                    data-info-title={m.title}
+                    data-info-text={m.info}
+                    aria-label={`Detalii despre ${m.title}`}
+                  >ℹ️</button>
+                  <a class="buy" href="/inregistrare">Cumpără</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))}
 
-    <section class="how reveal" style="--i: 9">
-      <h2>Cum va funcționa</h2>
-      <ol>
-        <li>Alegi materialul potrivit clasei copilului</li>
-        <li>Plătești online, cu cardul — primești automat factura</li>
-        <li>Materialul apare instant în contul tău, la „Materialele mele”, gata de descărcat</li>
-      </ol>
-    </section>
-
-    <aside class="soon reveal" style="--i: 10">
-      🛒 <strong>Primele titluri și prețurile se anunță la deschiderea magazinului.</strong>
-      <a href="/inregistrare">Creează-ți contul</a> ca să afli primul — și să faci, tot atunci,
-      testul gratuit de evaluare care îți arată exact de ce materiale are nevoie copilul.
+    <aside class="soon reveal" style="--i: 8">
+      Nu găsești ce cauți sau ai nevoie de un material pe un capitol anume?
+      <a href="/contact">Scrie-ne</a> — construim catalogul și după cererile părinților.
     </aside>
   </main>
+
+  <!-- Modalul de info (unul singur, refolosit) -->
+  <div id="info-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-x" data-close aria-label="Închide">×</button>
+      <p class="modal-kicker">Ce vei găsi în material</p>
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <div class="modal-foot">
+        <a class="buy" href="/inregistrare">Cumpără</a>
+      </div>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  const modal = document.getElementById('info-modal')!;
+  const titleEl = document.getElementById('modal-title')!;
+  const textEl = document.getElementById('modal-text')!;
+
+  function openModal(title: string, text: string) {
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.info-btn').forEach((btn) => {
+    btn.addEventListener('click', () =>
+      openModal(btn.dataset.infoTitle || '', btn.dataset.infoText || '')
+    );
+  });
+  modal.querySelectorAll('[data-close]').forEach((el) =>
+    el.addEventListener('click', closeModal)
+  );
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+</script>
 
 <style>
   .kicker { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--pen); }
   h1 { margin-top: 10px; font-size: clamp(1.9rem, 5vw, 3rem); }
-  .lead { margin-top: 16px; max-width: 60ch; font-size: 1.08rem; line-height: 1.7; color: var(--ink-soft); }
+  .lead { margin-top: 16px; max-width: 62ch; font-size: 1.06rem; line-height: 1.7; color: var(--ink-soft); }
+  .lead strong { color: var(--ink); }
 
-  .cats {
-    margin-top: clamp(32px, 5vh, 48px);
-    display: grid;
-    gap: 18px;
-  }
-
-  @media (min-width: 700px) { .cats { grid-template-columns: 1fr 1fr; } }
-  @media (min-width: 1000px) { .cats { grid-template-columns: repeat(3, 1fr); } }
-
-  .cat {
-    background: var(--card);
-    border: 1px solid rgba(43, 74, 139, 0.14);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .cat:hover {
-    transform: translateY(-4px) rotate(-0.3deg);
-    box-shadow: 0 10px 26px rgba(29, 46, 82, 0.11);
-  }
-
-  .cat-icon {
-    display: inline-grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    font-size: 1.3rem;
-    background: rgba(228, 87, 46, 0.1);
-  }
-
-  .cat h2 {
-    margin-top: 14px;
-    font-family: 'Fraunces Variable', serif;
-    font-weight: 600;
-    font-size: 1.16rem;
-  }
-
-  .cat p {
-    margin-top: 8px;
-    line-height: 1.6;
-    color: var(--ink-soft);
-    font-size: 0.96rem;
-  }
-
-  .how {
-    margin-top: clamp(36px, 6vh, 56px);
-    max-width: 560px;
-  }
-
-  .how h2 {
-    font-family: 'Fraunces Variable', serif;
-    font-weight: 600;
-    font-size: 1.4rem;
-  }
-
-  .how ol {
-    margin: 16px 0 0 22px;
-    display: grid;
-    gap: 10px;
-    line-height: 1.6;
-    color: var(--ink-soft);
-  }
-
-  .how li::marker {
-    color: var(--pen);
-    font-weight: 700;
-  }
-
-  .soon {
-    margin-top: 30px;
+  .notice {
+    margin-top: 18px;
     max-width: 640px;
-    padding: 18px 22px;
+    padding: 14px 18px;
     border-radius: 12px;
     border: 1.5px dashed rgba(228, 87, 46, 0.5);
     background: rgba(228, 87, 46, 0.05);
-    line-height: 1.65;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .notice strong { color: var(--ink); }
+  .notice a { color: var(--pen); font-weight: 700; }
+
+  .group { margin-top: clamp(36px, 6vh, 56px); }
+
+  .group-head h2 {
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+  }
+  .group-head p { margin-top: 4px; color: var(--ink-soft); }
+
+  .items {
+    margin-top: 18px;
+    display: grid;
+    gap: 16px;
+  }
+  @media (min-width: 680px) { .items { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1040px) { .items { grid-template-columns: repeat(3, 1fr); } }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 20px 20px 18px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px rgba(29, 46, 82, 0.1);
+  }
+
+  .item-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(43, 74, 139, 0.08);
     color: var(--ink-soft);
   }
 
-  .soon strong { color: var(--ink); }
+  .item h3 {
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.12rem;
+    line-height: 1.3;
+  }
+  .item-meta { margin-top: 6px; color: var(--ink-soft); font-size: 0.9rem; flex: 1; }
+
+  .item-foot {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .price {
+    font-weight: 700;
+    color: var(--pen);
+    font-size: 0.9rem;
+  }
+  .actions { display: flex; align-items: center; gap: 8px; }
+
+  .info-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(43, 74, 139, 0.25);
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .info-btn:hover { border-color: var(--pen); transform: scale(1.08); }
+
+  .buy {
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .buy:hover { background: var(--pen); }
+
+  .soon {
+    margin-top: clamp(36px, 6vh, 52px);
+    max-width: 640px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    background: var(--card);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
   .soon a { color: var(--pen); font-weight: 700; }
+
+  /* modal */
+  .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(29, 46, 82, 0.45); backdrop-filter: blur(2px); }
+  .modal-box {
+    position: relative;
+    width: min(500px, 100%);
+    background: var(--card);
+    border-radius: 16px;
+    padding: 30px 28px 26px;
+    box-shadow: 0 20px 60px rgba(29, 46, 82, 0.3);
+    animation: pop 0.2s ease;
+  }
+  @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-x {
+    position: absolute; top: 12px; right: 14px;
+    width: 34px; height: 34px; border: none; background: transparent;
+    font-size: 1.6rem; line-height: 1; color: var(--ink-soft); cursor: pointer; border-radius: 8px;
+  }
+  .modal-x:hover { background: rgba(43, 74, 139, 0.08); color: var(--ink); }
+  .modal-kicker { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pen); }
+  #modal-title { margin-top: 6px; font-family: 'Fraunces Variable', serif; font-weight: 600; font-size: 1.3rem; }
+  #modal-text { margin-top: 12px; line-height: 1.7; color: var(--ink-soft); }
+  .modal-foot { margin-top: 22px; display: flex; justify-content: flex-end; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .item, .item:hover, .info-btn, .modal-box { transition: none; animation: none; transform: none; }
+  }
 </style>
