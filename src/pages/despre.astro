@@ -1,0 +1,130 @@
+---
+// Pagina „Despre” — scheletul așteaptă povestea și poza profesoarei.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Despre — Ora de Mate Online"
+  description="Cine predă la Ora de Mate Online și cum lucrăm: grupe mici, explicații pe înțeles, progres vizibil."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Despre</p>
+    <h1 class="reveal" style="--i: 1">Cum lucrăm cu copiii</h1>
+
+    <div class="values">
+      <section class="value reveal" style="--i: 2">
+        <span class="num" aria-hidden="true">1</span>
+        <div>
+          <h2>Grupe mici, atenție reală</h2>
+          <p>
+            Nu clase aglomerate, ci grupe restrânse în care profesoara vede fiecare
+            caiet și aude fiecare întrebare. Copiii timizi prind curaj când nu se
+            pierd în mulțime.
+          </p>
+        </div>
+      </section>
+
+      <section class="value reveal" style="--i: 3">
+        <span class="num" aria-hidden="true">2</span>
+        <div>
+          <h2>Explicații pe înțeles, nu pe repede-înainte</h2>
+          <p>
+            Matematica nu e greu de învățat — e greu de învățat când nimeni nu are
+            răbdare să o ia de unde a rămas copilul. Aici exact de acolo pornim.
+          </p>
+        </div>
+      </section>
+
+      <section class="value reveal" style="--i: 4">
+        <span class="num" aria-hidden="true">3</span>
+        <div>
+          <h2>Progres pe care îl vezi</h2>
+          <p>
+            Părinții nu trebuie să ghicească dacă „se prinde ceva”: urmărim împreună
+            evoluția, de la primul test de evaluare până la notele de la școală.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <aside class="soon reveal" style="--i: 5">
+      ✏️ <strong>În curând aici:</strong> povestea profesoarei, calificările ei și
+      metoda de lucru, povestite pe îndelete. Pagina se scrie chiar acum.
+    </aside>
+  </main>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+  }
+
+  .values {
+    margin-top: clamp(32px, 5vh, 48px);
+    display: grid;
+    gap: 22px;
+    max-width: 640px;
+  }
+
+  .value {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+  }
+
+  .num {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--pen);
+    color: var(--pen);
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transform: rotate(-6deg);
+  }
+
+  .value h2 {
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.18rem;
+  }
+
+  .value p {
+    margin-top: 8px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  .soon {
+    margin-top: 30px;
+    max-width: 640px;
+    padding: 18px 22px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(228, 87, 46, 0.5);
+    background: rgba(228, 87, 46, 0.05);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .soon strong {
+    color: var(--ink);
+  }
+</style>

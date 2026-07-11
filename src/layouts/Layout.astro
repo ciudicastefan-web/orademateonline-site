@@ -1,0 +1,219 @@
+---
+// Layout-ul comun al site-ului: antet cu navigare, subsol, stiluri globale
+// („caietul de matematică”). Paginile îl folosesc și pun conținutul în <slot />.
+import '@fontsource-variable/fraunces';
+import '@fontsource/atkinson-hyperlegible/400.css';
+import '@fontsource/atkinson-hyperlegible/700.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const nav = [
+  { href: '/', label: 'Acasă' },
+  { href: '/despre', label: 'Despre' },
+  { href: '/cursuri', label: 'Cursuri' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <!-- La lansare: scoate linia de mai jos ca site-ul să fie indexat. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+  </head>
+
+  <body>
+    <header>
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">π</span>
+        Ora de Mate <em>Online</em>
+      </a>
+      <nav aria-label="Navigare principală">
+        {nav.map((item) => (
+          <a href={item.href} aria-current={path === item.href.replace(/\/$/, '') || (item.href === '/' && path === '/') ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+
+    <slot />
+
+    <footer>
+      © 2026 Ora de Mate Online &nbsp;·&nbsp; orademateonline.ro
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --paper: #fbf7ef;
+    --grid: rgba(43, 74, 139, 0.09);
+    --margin-line: rgba(228, 87, 46, 0.28);
+    --ink: #1d2e52;
+    --ink-soft: #51618a;
+    --pen: #e4572e;
+    --card: #fffdf8;
+    --cell: 28px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--paper);
+  }
+
+  body {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Atkinson Hyperlegible', sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 255, 255, 0.75), transparent 60%),
+      repeating-linear-gradient(to right, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
+      repeating-linear-gradient(to bottom, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
+      var(--paper);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: clamp(20px, 6vw, 84px);
+    width: 2px;
+    background: var(--margin-line);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  main {
+    width: min(920px, 92vw);
+    padding: clamp(36px, 7vh, 72px) 16px 32px;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    font-family: 'Fraunces Variable', serif;
+    font-variation-settings: 'SOFT' 60, 'WONK' 1;
+    font-weight: 560;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 0.12s);
+  }
+
+  @keyframes rise {
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { animation: none; opacity: 1; transform: none; }
+  }
+</style>
+
+<style>
+  header {
+    width: min(920px, 92vw);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 22px 16px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 620;
+    font-size: 1.15rem;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  .brand em {
+    color: var(--pen);
+    font-style: normal;
+  }
+
+  .brand-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 1.15rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  nav a:hover {
+    color: var(--ink);
+    background: rgba(43, 74, 139, 0.07);
+  }
+
+  nav a[aria-current='page'] {
+    color: var(--pen);
+    background: rgba(228, 87, 46, 0.09);
+  }
+
+  footer {
+    padding: 26px 16px 34px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    position: relative;
+    z-index: 2;
+  }
+</style>

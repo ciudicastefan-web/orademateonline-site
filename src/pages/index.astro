@@ -1,156 +1,75 @@
 ---
-// Pagina „în curând” — orademateonline.ro
-// Estetica: caietul de matematică (caroiaj, linie de margine, cerneală, pix roșu).
-// La lansare: scoate meta robots noindex de mai jos.
-import '@fontsource-variable/fraunces';
-import '@fontsource/atkinson-hyperlegible/400.css';
-import '@fontsource/atkinson-hyperlegible/700.css';
+// Pagina principală — deocamdată în modul „în curând”.
+import Layout from '../layouts/Layout.astro';
 ---
 
-<!doctype html>
-<html lang="ro">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ora de Mate Online — meditații de matematică, în curând</title>
-    <meta
-      name="description"
-      content="Meditații de matematică online, în grupe mici, pentru elevi. Grupe live, materiale de lucru și test gratuit de evaluare — lansăm în curând."
-    />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta property="og:title" content="Ora de Mate Online" />
-    <meta property="og:description" content="Meditații de matematică online, în grupe mici. Lansăm în curând." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://orademateonline.ro/" />
-    <!-- deploy: auto-cron-test-1 -->
-  </head>
+<Layout
+  title="Ora de Mate Online — meditații de matematică, în curând"
+  description="Meditații de matematică online, în grupe mici, pentru elevi. Grupe live, materiale de lucru și test gratuit de evaluare — lansăm în curând."
+>
+  <div class="doodles" aria-hidden="true">
+    <span class="doodle d1">π</span>
+    <span class="doodle d2">√x</span>
+    <span class="doodle d3">÷</span>
+    <span class="doodle d4">Δ</span>
+    <span class="doodle d5">∞</span>
+  </div>
 
-  <body>
-    <!-- doodle-uri de caiet -->
-    <div class="doodles" aria-hidden="true">
-      <span class="doodle d1">π</span>
-      <span class="doodle d2">√x</span>
-      <span class="doodle d3">÷</span>
-      <span class="doodle d4">Δ</span>
-      <span class="doodle d5">∞</span>
-    </div>
+  <main>
+    <p class="badge reveal" style="--i: 0">
+      <span class="badge-dot" aria-hidden="true"></span>
+      Site în construcție · lansăm în curând
+    </p>
 
-    <main>
-      <p class="badge reveal" style="--i: 0">
-        <span class="badge-dot" aria-hidden="true"></span>
-        Site în construcție · lansăm în curând
-      </p>
+    <h1 class="hero-title reveal" style="--i: 1">
+      Matematica, pe
+      <span class="squiggle-wrap">
+        înțelesul
+        <svg class="squiggle" viewBox="0 0 220 14" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M3 9 C 25 3, 45 13, 70 8 S 120 3, 145 9 S 195 12, 217 6" />
+        </svg>
+      </span>
+      copilului tău.
+      <span class="nota10" aria-hidden="true">
+        <svg viewBox="0 0 90 60">
+          <text x="45" y="40" text-anchor="middle">10</text>
+          <ellipse cx="45" cy="30" rx="38" ry="22" />
+        </svg>
+      </span>
+    </h1>
 
-      <p class="overline reveal" style="--i: 1">Ora de Mate Online</p>
+    <p class="lead reveal" style="--i: 2">
+      Meditații online în grupe mici, cu explicații răbdătoare și progres
+      pe care îl vezi de la o lună la alta.
+    </p>
 
-      <h1 class="reveal" style="--i: 2">
-        Matematica, pe
-        <span class="squiggle-wrap">
-          înțelesul
-          <svg class="squiggle" viewBox="0 0 220 14" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M3 9 C 25 3, 45 13, 70 8 S 120 3, 145 9 S 195 12, 217 6" />
-          </svg>
-        </span>
-        copilului tău.
-        <span class="nota10" aria-hidden="true">
-          <svg viewBox="0 0 90 60">
-            <text x="45" y="40" text-anchor="middle">10</text>
-            <ellipse cx="45" cy="30" rx="38" ry="22" />
-          </svg>
-        </span>
-      </h1>
+    <section class="cards" aria-label="Ce pregătim">
+      <article class="card reveal" style="--i: 3">
+        <span class="chip" aria-hidden="true">∑</span>
+        <h2>Grupe mici, live</h2>
+        <p>Ore online în grupe restrânse, unde fiecare copil primește atenție — și curaj.</p>
+      </article>
+      <article class="card reveal" style="--i: 4">
+        <span class="chip" aria-hidden="true">✎</span>
+        <h2>Materiale de lucru</h2>
+        <p>Fișe și exerciții pregătite pe fiecare clasă, de lucrat acasă în ritm propriu.</p>
+      </article>
+      <article class="card reveal" style="--i: 5">
+        <span class="chip" aria-hidden="true">Δ</span>
+        <h2>Test de evaluare gratuit</h2>
+        <p>În câteva minute afli exact unde are lacune copilul — și de unde pornim împreună.</p>
+      </article>
+    </section>
 
-      <p class="lead reveal" style="--i: 3">
-        Meditații online în grupe mici, cu explicații răbdătoare și progres
-        pe care îl vezi de la o lună la alta.
-      </p>
-
-      <section class="cards" aria-label="Ce pregătim">
-        <article class="card reveal" style="--i: 4">
-          <span class="chip" aria-hidden="true">∑</span>
-          <h2>Grupe mici, live</h2>
-          <p>Ore online în grupe restrânse, unde fiecare copil primește atenție — și curaj.</p>
-        </article>
-        <article class="card reveal" style="--i: 5">
-          <span class="chip" aria-hidden="true">✎</span>
-          <h2>Materiale de lucru</h2>
-          <p>Fișe și exerciții pregătite pe fiecare clasă, de lucrat acasă în ritm propriu.</p>
-        </article>
-        <article class="card reveal" style="--i: 6">
-          <span class="chip" aria-hidden="true">Δ</span>
-          <h2>Test de evaluare gratuit</h2>
-          <p>În câteva minute afli exact unde are lacune copilul — și de unde pornim împreună.</p>
-        </article>
-      </section>
-
-      <p class="ps reveal" style="--i: 7">
-        Primele grupe se anunță aici, în curând. <em>Ținem locul cald.</em> ✏️
-      </p>
-    </main>
-
-    <footer class="reveal" style="--i: 8">
-      © 2026 Ora de Mate Online &nbsp;·&nbsp; orademateonline.ro
-    </footer>
-  </body>
-</html>
+    <p class="ps reveal" style="--i: 6">
+      Primele grupe se anunță aici, în curând. <em>Ținem locul cald.</em> ✏️
+    </p>
+  </main>
+</Layout>
 
 <style>
-  :root {
-    --paper: #fbf7ef;
-    --grid: rgba(43, 74, 139, 0.09);
-    --margin-line: rgba(228, 87, 46, 0.28);
-    --ink: #1d2e52;
-    --ink-soft: #51618a;
-    --pen: #e4572e;
-    --card: #fffdf8;
-    --cell: 28px;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html {
-    background: var(--paper);
-  }
-
-  body {
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: 'Atkinson Hyperlegible', sans-serif;
-    color: var(--ink);
-    /* caroiajul caietului de mate + vinieta caldă */
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(255, 255, 255, 0.75), transparent 60%),
-      repeating-linear-gradient(to right, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
-      repeating-linear-gradient(to bottom, transparent, transparent calc(var(--cell) - 1px), var(--grid) calc(var(--cell) - 1px), var(--grid) var(--cell)),
-      var(--paper);
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  /* linia roșie de margine, ca-n caiet */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: clamp(20px, 6vw, 84px);
-    width: 2px;
-    background: var(--margin-line);
-    pointer-events: none;
-  }
-
   main {
-    width: min(920px, 92vw);
-    padding: clamp(48px, 10vh, 110px) 16px 32px;
     text-align: center;
-    flex: 1;
   }
 
   .badge {
@@ -176,25 +95,11 @@ import '@fontsource/atkinson-hyperlegible/700.css';
     animation: pulse 2.4s ease-in-out infinite;
   }
 
-  .overline {
-    margin-top: 34px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--pen);
-  }
-
-  h1 {
+  .hero-title {
     position: relative;
-    margin: 14px auto 0;
+    margin: 26px auto 0;
     max-width: 17ch;
-    font-family: 'Fraunces Variable', serif;
-    font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 60;
-    font-weight: 560;
     font-size: clamp(2.1rem, 6.4vw, 4.1rem);
-    line-height: 1.12;
-    letter-spacing: -0.01em;
   }
 
   .squiggle-wrap {
@@ -221,7 +126,6 @@ import '@fontsource/atkinson-hyperlegible/700.css';
     animation: draw 0.9s ease-out 0.9s forwards;
   }
 
-  /* nota 10, încercuită cu pixul */
   .nota10 {
     position: absolute;
     top: -1.3em;
@@ -244,7 +148,6 @@ import '@fontsource/atkinson-hyperlegible/700.css';
     stroke-linecap: round;
     stroke-dasharray: 195;
     stroke-dashoffset: 195;
-    transform-origin: center;
     animation: draw 0.8s ease-out 1.5s forwards;
   }
 
@@ -322,14 +225,6 @@ import '@fontsource/atkinson-hyperlegible/700.css';
     font-style: italic;
   }
 
-  footer {
-    padding: 26px 16px 34px;
-    font-size: 0.88rem;
-    color: var(--ink-soft);
-    letter-spacing: 0.02em;
-  }
-
-  /* doodle-uri plutitoare */
   .doodles {
     position: fixed;
     inset: 0;
@@ -344,7 +239,7 @@ import '@fontsource/atkinson-hyperlegible/700.css';
     animation: float 7s ease-in-out infinite;
   }
 
-  .d1 { top: 14%; left: 12%; font-size: 2.6rem; animation-delay: 0s; }
+  .d1 { top: 14%; left: 12%; font-size: 2.6rem; }
   .d2 { top: 28%; right: 10%; font-size: 2rem; animation-delay: 1.2s; }
   .d3 { bottom: 30%; left: 9%; font-size: 2.2rem; animation-delay: 2.1s; }
   .d4 { bottom: 18%; right: 14%; font-size: 1.9rem; animation-delay: 0.7s; }
@@ -352,18 +247,6 @@ import '@fontsource/atkinson-hyperlegible/700.css';
 
   @media (max-width: 700px) {
     .d3, .d5 { display: none; }
-  }
-
-  /* animații */
-  .reveal {
-    opacity: 0;
-    transform: translateY(14px);
-    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-    animation-delay: calc(var(--i) * 0.12s);
-  }
-
-  @keyframes rise {
-    to { opacity: 1; transform: none; }
   }
 
   @keyframes draw {
@@ -381,7 +264,6 @@ import '@fontsource/atkinson-hyperlegible/700.css';
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .reveal { animation: none; opacity: 1; transform: none; }
     .squiggle path, .nota10 ellipse { animation: none; stroke-dashoffset: 0; }
     .doodle, .badge-dot { animation: none; }
     .card, .card:hover { transition: none; transform: none; }

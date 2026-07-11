@@ -1,0 +1,128 @@
+---
+// Pagina „Cursuri” — schelet: modelul de lucru e stabilit, grupele concrete
+// (clase, orar, prețuri) se anunță când se deschid înscrierile.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Cursuri — Ora de Mate Online"
+  description="Grupe mici de matematică online, pe clase, plus materiale de lucru. Înscrierile se deschid în curând."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Cursuri</p>
+    <h1 class="reveal" style="--i: 1">Grupe mici, pe clase</h1>
+
+    <p class="lead reveal" style="--i: 2">
+      Fiecare grupă are un număr limitat de locuri și copii din aceeași clasă,
+      ca ora să meargă în ritmul potrivit pentru toți. Orele se țin live, online —
+      primești linkul de conectare după înscriere.
+    </p>
+
+    <div class="steps">
+      <div class="step reveal" style="--i: 3">
+        <span class="badge-step">Pasul 1</span>
+        <h2>Testul de evaluare</h2>
+        <p>Gratuit, ~15 minute. Aflăm exact unde are lacune copilul și ce grupă i se potrivește.</p>
+      </div>
+      <div class="step reveal" style="--i: 4">
+        <span class="badge-step">Pasul 2</span>
+        <h2>Înscrierea în grupă</h2>
+        <p>Alegi grupa pe clasa copilului. Locuri limitate — când se umplu, se deschide lista de așteptare.</p>
+      </div>
+      <div class="step reveal" style="--i: 5">
+        <span class="badge-step">Pasul 3</span>
+        <h2>Orele + materialele</h2>
+        <p>Ore live în fiecare săptămână, plus fișe de lucru pentru acasă. Progresul se vede în caiet și în note.</p>
+      </div>
+    </div>
+
+    <aside class="soon reveal" style="--i: 6">
+      🗓️ <strong>Grupele concrete</strong> — pe ce clase, în ce zile, la ce preț —
+      se anunță pe pagina asta la deschiderea înscrierilor. Site-ul e în construcție.
+    </aside>
+  </main>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+  }
+
+  .lead {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .steps {
+    margin-top: clamp(32px, 5vh, 48px);
+    display: grid;
+    gap: 18px;
+  }
+
+  @media (min-width: 760px) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .step {
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+  }
+
+  .badge-step {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pen);
+    border: 1.5px solid rgba(228, 87, 46, 0.45);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  .step h2 {
+    margin-top: 14px;
+    font-family: 'Fraunces Variable', serif;
+    font-weight: 600;
+    font-size: 1.18rem;
+  }
+
+  .step p {
+    margin-top: 8px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  .soon {
+    margin-top: 30px;
+    max-width: 640px;
+    padding: 18px 22px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(228, 87, 46, 0.5);
+    background: rgba(228, 87, 46, 0.05);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .soon strong {
+    color: var(--ink);
+  }
+</style>
