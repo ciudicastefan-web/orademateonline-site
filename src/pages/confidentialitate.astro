@@ -1,0 +1,73 @@
+---
+// SCHIȚĂ: politica de confidențialitate completă se scrie în faza legală
+// (împreună cu T&C și politica de cookies), înainte de lansare.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Politica de confidențialitate — Ora de Mate Online"
+  description="Cum prelucrăm datele personale la Ora de Mate Online."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Legal</p>
+    <h1 class="reveal" style="--i: 1">Politica de confidențialitate</h1>
+
+    <div class="body reveal" style="--i: 2">
+      <p>
+        Pe scurt, principiile după care lucrăm — versiunea completă și detaliată a
+        acestei politici va fi publicată aici înainte de lansarea serviciilor:
+      </p>
+      <ul>
+        <li><strong>Contul aparține părintelui.</strong> Despre copil colectăm minimul necesar
+          înscrierii în grupa potrivită: prenumele și clasa (școala — doar dacă alegi să ne-o spui).</li>
+        <li><strong>Colectăm doar ce folosim.</strong> Email-ul tău servește la autentificare și la
+          comunicări despre cont; comunicările de marketing se trimit doar cu acordul tău explicit.</li>
+        <li><strong>Nu vindem și nu împărtășim datele</strong> cu terți în scopuri comerciale.</li>
+        <li><strong>Poți cere oricând</strong> accesul la datele tale, corectarea sau ștergerea lor.</li>
+      </ul>
+      <p class="note">📝 Documentul juridic complet (temeiurile de prelucrare, durata stocării,
+        drepturile GDPR detaliate, datele operatorului) este în curs de redactare și va fi
+        publicat pe această pagină înainte de lansare.</p>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  }
+
+  .body {
+    margin-top: 22px;
+    max-width: 64ch;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .body strong {
+    color: var(--ink);
+  }
+
+  .body ul {
+    margin: 16px 0 16px 22px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .note {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(228, 87, 46, 0.5);
+    background: rgba(228, 87, 46, 0.05);
+  }
+</style>

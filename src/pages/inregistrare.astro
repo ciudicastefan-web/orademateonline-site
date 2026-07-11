@@ -1,0 +1,215 @@
+---
+// Înregistrare cont de părinte.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Creează cont — Ora de Mate Online"
+  description="Creează-ți cont de părinte la Ora de Mate Online."
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Cont nou</p>
+    <h1 class="reveal" style="--i: 1">Creează-ți contul de părinte</h1>
+    <p class="lead reveal" style="--i: 2">
+      Contul e al tău, ca părinte — copilul apare doar ca profil, cu datele minime
+      de care avem nevoie ca să-l așezăm în grupa potrivită.
+    </p>
+
+    <div id="flash" class="flash" hidden></div>
+
+    <form class="panel reveal" style="--i: 3" method="post" action="/api/register.php">
+      <label>
+        Numele tău
+        <input type="text" name="full_name" required minlength="2" maxlength="120" autocomplete="name" />
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" required maxlength="190" autocomplete="email" />
+      </label>
+      <label>
+        Parolă <span class="hint">minim 10 caractere</span>
+        <input type="password" name="password" required minlength="10" autocomplete="new-password" />
+      </label>
+      <label>
+        Repetă parola
+        <input type="password" name="password2" required minlength="10" autocomplete="new-password" />
+      </label>
+
+      <p class="hp" aria-hidden="true">
+        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      </p>
+
+      <label class="check">
+        <input type="checkbox" name="gdpr" required />
+        <span>
+          Sunt de acord cu prelucrarea datelor conform
+          <a href="/confidentialitate">politicii de confidențialitate</a>. <em>(obligatoriu)</em>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" name="marketing" />
+        <span>Vreau să primesc pe email noutăți despre grupe și materiale. <em>(opțional)</em></span>
+      </label>
+
+      <button type="submit">Creează contul</button>
+      <p class="alt">Ai deja cont? <a href="/autentificare">Autentifică-te</a></p>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  const MSG: Record<string, [string, boolean]> = {
+    'err=nume': ['Numele trebuie să aibă între 2 și 120 de caractere.', true],
+    'err=email': ['Adresa de email nu pare validă.', true],
+    'err=parola-scurta': ['Parola trebuie să aibă minim 10 caractere.', true],
+    'err=parole': ['Parolele nu coincid.', true],
+    'err=gdpr': ['Trebuie să fii de acord cu politica de confidențialitate.', true],
+  };
+  const q = window.location.search.replace('?', '');
+  const flash = document.getElementById('flash')!;
+  for (const key in MSG) {
+    if (q.includes(key)) {
+      flash.textContent = MSG[key][0];
+      flash.classList.toggle('is-err', MSG[key][1]);
+      flash.hidden = false;
+      break;
+    }
+  }
+</script>
+
+<style>
+  .kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+  }
+
+  .lead {
+    margin-top: 14px;
+    max-width: 56ch;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  .flash {
+    margin-top: 22px;
+    max-width: 480px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(43, 74, 139, 0.4);
+    background: rgba(43, 74, 139, 0.06);
+    line-height: 1.5;
+  }
+
+  .flash.is-err {
+    border-color: rgba(228, 87, 46, 0.55);
+    background: rgba(228, 87, 46, 0.07);
+    color: var(--ink);
+  }
+
+  .panel {
+    margin-top: 26px;
+    max-width: 480px;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 3px 16px rgba(29, 46, 82, 0.06);
+    display: grid;
+    gap: 18px;
+  }
+
+  label {
+    display: grid;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .hint {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='password'] {
+    font: inherit;
+    font-weight: 400;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(43, 74, 139, 0.25);
+    background: #fff;
+    color: var(--ink);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--pen);
+    outline-offset: 1px;
+  }
+
+  .check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .check input {
+    margin-top: 3px;
+    accent-color: var(--pen);
+  }
+
+  .check a {
+    color: var(--pen);
+  }
+
+  .check em {
+    font-style: normal;
+    font-size: 0.82rem;
+  }
+
+  .hp {
+    position: absolute;
+    left: -9999px;
+  }
+
+  button {
+    font: inherit;
+    font-weight: 700;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  button:hover {
+    background: var(--pen);
+    transform: translateY(-1px);
+  }
+
+  .alt {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .alt a {
+    color: var(--pen);
+    font-weight: 700;
+  }
+</style>

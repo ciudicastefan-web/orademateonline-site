@@ -29,4 +29,11 @@ CREATE TABLE IF NOT EXISTS children (
   CONSTRAINT fk_children_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Limitare de rată (anti brute-force) pentru înregistrare/login.
+CREATE TABLE IF NOT EXISTS throttle (
+  k VARCHAR(120) PRIMARY KEY,
+  cnt INT UNSIGNED NOT NULL DEFAULT 1,
+  win_start DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Tabelele pentru cumpărături/cursuri vin în faza Stripe (legate de users.id).
