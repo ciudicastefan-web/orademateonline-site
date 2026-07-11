@@ -440,13 +440,36 @@ import Layout from '../layouts/Layout.astro';
 
   .review-placeholder strong { color: var(--ink); }
 
+  /* bilețel de caiet „lipit” pe pagină cu bandă adezivă — nu un panou corporate */
   .cta-band {
     margin-top: clamp(52px, 9vh, 84px);
-    background: var(--ink);
-    color: var(--paper);
-    border-radius: 20px;
-    padding: clamp(32px, 6vw, 52px);
+    position: relative;
+    text-align: center;
+    color: var(--ink);
+    background:
+      repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(43, 74, 139, 0.11) 27px, rgba(43, 74, 139, 0.11) 28px),
+      var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.22);
+    border-radius: 4px;
+    padding: clamp(36px, 6vw, 56px);
+    transform: rotate(-0.6deg);
+    box-shadow: 0 12px 28px rgba(29, 46, 82, 0.12);
   }
+
+  .cta-band::before,
+  .cta-band::after {
+    content: '';
+    position: absolute;
+    top: -13px;
+    width: clamp(70px, 12vw, 116px);
+    height: 26px;
+    background: rgba(228, 87, 46, 0.2);
+    border-left: 1px dashed rgba(255, 255, 255, 0.6);
+    border-right: 1px dashed rgba(255, 255, 255, 0.6);
+  }
+
+  .cta-band::before { left: 7%; transform: rotate(-5deg); }
+  .cta-band::after { right: 7%; transform: rotate(4deg); }
 
   .cta-band h2 {
     font-family: 'Fraunces Variable', serif;
@@ -454,10 +477,21 @@ import Layout from '../layouts/Layout.astro';
     font-size: clamp(1.4rem, 3.4vw, 2rem);
   }
 
+  .cta-band h2::after {
+    content: '';
+    display: block;
+    width: 148px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 99px;
+    background: var(--pen);
+    transform: rotate(-1.2deg);
+  }
+
   .cta-band p {
-    margin: 12px auto 22px;
+    margin: 14px auto 24px;
     max-width: 48ch;
-    color: rgba(251, 247, 239, 0.75);
+    color: var(--ink-soft);
     line-height: 1.6;
   }
 
@@ -466,8 +500,8 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .cta-band .btn-primary:hover {
-    background: var(--paper);
-    color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
   }
 
   .faq-teaser {

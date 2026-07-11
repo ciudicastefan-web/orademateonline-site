@@ -136,6 +136,8 @@ import Layout from '../layouts/Layout.astro';
     'err=programare-dubla': ['Elevul e deja înscris la această oră.', true],
     'err=programare-clasa': ['Ora aleasă e pentru altă clasă decât a elevului.', true],
     'err=programare': ['Programarea nu a putut fi făcută. Încearcă din nou.', true],
+    'err=copil-nume': ['Prenumele elevului trebuie să aibă între 2 și 80 de caractere.', true],
+    'err=copil-limita': ['Ai atins numărul maxim de profiluri de elevi (6).', true],
   };
   const q = window.location.search.replace('?', '');
   const flashEl = document.getElementById('cal-flash')!;
@@ -197,7 +199,10 @@ import Layout from '../layouts/Layout.astro';
     }
 
     if (!children.length) {
-      root.append(noteWithAccountLink('💡 Adaugă întâi elevul în ', ' (prenume + clasă) ca să te poți înscrie la ore.'));
+      root.append(noteWithAccountLink(
+        '💡 Nu ai încă un elev în cont — apasă „Înscrie un elev nou” direct pe ora potrivită și completezi datele lui pe loc, sau adaugă-l din ',
+        '.'
+      ));
     }
 
     const byDay = new Map<string, any[]>();
@@ -269,8 +274,29 @@ import Layout from '../layouts/Layout.astro';
           card.append(form);
         }
 
-        if (!enrolled && !full && matching.length === 0 && children.length > 0) {
-          card.append(el('div', 'cal-hint', 'pentru altă clasă'));
+        if (!enrolled && !full && matching.length === 0) {
+          // fără elev pe clasa orei: formularul de elev (ca în cont) chiar pe card —
+          // clasa o preia automat de la oră, apoi înscrierea se face în același pas
+          if (children.length > 0) card.append(el('div', 'cal-hint', 'elevii tăi sunt pe altă clasă'));
+          const det = el('details', 'cal-add');
+          det.append(el('summary', '', '➕ Înscrie un elev nou'));
+          const form = el('form', 'cal-enroll');
+          form.setAttribute('method', 'post');
+          form.setAttribute('action', '/api/book.php');
+          const h1 = el('input'); h1.type = 'hidden'; h1.name = 'session_id'; h1.value = String(s.id);
+          const h2 = el('input'); h2.type = 'hidden'; h2.name = 'back'; h2.value = '/cursuri';
+          const nameIn = el('input');
+          nameIn.type = 'text'; nameIn.name = 'new_child_name';
+          nameIn.placeholder = 'Prenumele elevului';
+          nameIn.required = true; nameIn.minLength = 2; nameIn.maxLength = 80;
+          const schoolIn = el('input');
+          schoolIn.type = 'text'; schoolIn.name = 'new_child_school';
+          schoolIn.placeholder = 'Școala (opțional)'; schoolIn.maxLength = 160;
+          form.append(h1, h2, nameIn, schoolIn,
+            el('div', 'cal-add-note', `Îl trecem automat la ${GRADES[s.grade] ?? 'clasa orei'}.`),
+            el('button', '', 'Adaugă elevul și înscrie-l'));
+          det.append(form);
+          card.append(det);
         }
 
         col.append(card);
@@ -657,5 +683,36 @@ import Layout from '../layouts/Layout.astro';
     font-size: 0.78rem;
     color: rgba(81, 97, 138, 0.7);
     font-style: italic;
+  }
+
+  .cal-sec :global(.cal-add summary) {
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--pen);
+    list-style: none;
+    padding: 4px 0;
+  }
+
+  .cal-sec :global(.cal-add summary::-webkit-details-marker) { display: none; }
+
+  .cal-sec :global(.cal-add summary:hover) { text-decoration: underline; }
+
+  .cal-sec :global(.cal-add[open] summary) { margin-bottom: 6px; }
+
+  .cal-sec :global(.cal-enroll input[type='text']) {
+    font: inherit;
+    font-size: 0.86rem;
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid rgba(43, 74, 139, 0.3);
+    background: #fff;
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .cal-sec :global(.cal-add-note) {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
   }
 </style>

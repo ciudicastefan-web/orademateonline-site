@@ -15,23 +15,49 @@ if (!$u) {
 
 $sessionId = (int) ($_POST['session_id'] ?? 0);
 $childId = (int) ($_POST['child_id'] ?? 0);
+$newChildName = trim($_POST['new_child_name'] ?? '');
+$newChildSchool = trim($_POST['new_child_school'] ?? '');
 // înscrierea se poate face și din calendarul paginii Cursuri — revii acolo
 $back = ($_POST['back'] ?? '') === '/cursuri' ? '/cursuri' : '/cont/';
 $pdo = db();
 
-$st = $pdo->prepare('SELECT * FROM children WHERE id = ? AND user_id = ?');
-$st->execute([$childId, $u['id']]);
-$child = $st->fetch();
-if (!$child) {
-    redirect($back . '?err=programare');
-}
-
+// ora se încarcă prima: dacă profilul elevului se creează pe loc, clasa lui e clasa orei
 $st = $pdo->prepare('SELECT * FROM class_sessions WHERE id = ?');
 $st->execute([$sessionId]);
 $sess = $st->fetch();
-if (!$sess || strtotime((string) $sess['starts_at']) < time()) {
+if (!$sess || $sess['status'] !== 'active' || strtotime((string) $sess['starts_at']) < time()) {
     redirect($back . '?err=programare');
 }
+
+if ($childId > 0) {
+    $st = $pdo->prepare('SELECT * FROM children WHERE id = ? AND user_id = ?');
+    $st->execute([$childId, $u['id']]);
+    $child = $st->fetch();
+    if (!$child) {
+        redirect($back . '?err=programare');
+    }
+} elseif ($newChildName !== '') {
+    // înscriere direct din calendar, fără elev potrivit în cont:
+    // creăm profilul (aceleași reguli ca în child-save.php), apoi programăm
+    if (mb_strlen($newChildName) < 2 || mb_strlen($newChildName) > 80) {
+        redirect($back . '?err=copil-nume');
+    }
+    if (mb_strlen($newChildSchool) > 160) {
+        $newChildSchool = mb_substr($newChildSchool, 0, 160);
+    }
+    $st = $pdo->prepare('SELECT COUNT(*) FROM children WHERE user_id = ?');
+    $st->execute([$u['id']]);
+    if ((int) $st->fetchColumn() >= 6) {
+        redirect($back . '?err=copil-limita');
+    }
+    $pdo->prepare('INSERT INTO children (user_id, first_name, grade, school) VALUES (?, ?, ?, ?)')
+        ->execute([$u['id'], $newChildName, (int) $sess['grade'], $newChildSchool !== '' ? $newChildSchool : null]);
+    $childId = (int) $pdo->lastInsertId();
+    $child = ['id' => $childId, 'grade' => (int) $sess['grade']];
+} else {
+    redirect($back . '?err=programare');
+}
+
 if ((int) $sess['grade'] !== (int) $child['grade']) {
     redirect($back . '?err=programare-clasa');
 }
