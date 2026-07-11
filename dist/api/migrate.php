@@ -43,7 +43,7 @@ $ddl = [
       win_start DATETIME NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
-    -- v3: produse (PDF-uri, cursuri) și achiziții
+    // v3: produse (PDF-uri, cursuri) și achiziții
     "CREATE TABLE IF NOT EXISTS products (
       id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       type VARCHAR(20) NOT NULL DEFAULT 'pdf',
@@ -66,7 +66,7 @@ $ddl = [
       CONSTRAINT fk_purch_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
-    -- v3: orele (sesiunile live) și programările copiilor la ele
+    // v3: orele (sesiunile live) și programările copiilor la ele
     "CREATE TABLE IF NOT EXISTS class_sessions (
       id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       title VARCHAR(160) NOT NULL,
