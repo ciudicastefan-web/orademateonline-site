@@ -203,8 +203,8 @@ foreach ($map as $k => $m) {
       </section>
 
       <section class="panel">
-        <h2>🎒 Copiii înscriși</h2>
-        <?php if (!$children): ?><p class="empty">Niciun profil încă — adaugă mai jos primul copil.</p><?php endif; ?>
+        <h2>🎒 Elevii din cont</h2>
+        <?php if (!$children): ?><p class="empty">Niciun profil încă — adaugă mai jos elevul (copilul tău, sau chiar tu, dacă ești elev cu cont propriu).</p><?php endif; ?>
         <?php foreach ($children as $c): ?>
           <div class="row">
             <div>
@@ -218,7 +218,7 @@ foreach ($map as $k => $m) {
           </div>
         <?php endforeach; ?>
         <form method="post" action="/api/child-save.php" style="margin-top:16px">
-          <label>Prenumele copilului <input type="text" name="first_name" required minlength="2" maxlength="80" /></label>
+          <label>Prenumele elevului <input type="text" name="first_name" required minlength="2" maxlength="80" /></label>
           <label>Clasa
             <select name="grade" required>
               <option value="" disabled selected>alege clasa</option>
@@ -226,7 +226,7 @@ foreach ($map as $k => $m) {
             </select>
           </label>
           <label>Școala <span class="muted">(opțional)</span> <input type="text" name="school" maxlength="160" /></label>
-          <button type="submit">Adaugă copilul</button>
+          <button type="submit">Adaugă elevul</button>
         </form>
       </section>
     </div>
