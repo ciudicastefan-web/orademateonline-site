@@ -244,6 +244,13 @@ const nav = [
     color: var(--paper);
   }
 
+  /* pe telefoane: meniul se strânge și se centrează, ca să nu mănânce ecranul */
+  @media (max-width: 700px) {
+    header { justify-content: center; text-align: center; }
+    nav { justify-content: center; gap: 2px; }
+    nav a { padding: 6px 10px; font-size: 0.88rem; }
+  }
+
   footer {
     padding: 26px 16px 34px;
     font-size: 0.88rem;

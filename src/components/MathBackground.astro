@@ -74,9 +74,13 @@
   .sc-circ { top: 44%; right: 2vw; }
   .sc-pyt  { top: 74%; left: 1.5vw; }
 
-  /* pe ecrane înguste conținutul acoperă marginile — ascundem scenele */
+  /* pe ecrane înguste (telefoane/tablete): versiune redusă — două scene mici,
+     vizibile în zona hero și în spațiile dintre secțiuni (stau oricum sub conținut) */
   @media (max-width: 1180px) {
-    .mathbg { display: none; }
+    .sc-frac, .sc-circ, .sc-pyt { display: none; }
+    .scene { width: clamp(120px, 34vw, 160px); }
+    .sc-eq  { top: 10%; left: 6px; }
+    .sc-tri { top: auto; bottom: 8%; right: 6px; }
   }
 
   text {
