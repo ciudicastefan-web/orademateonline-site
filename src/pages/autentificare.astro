@@ -32,6 +32,14 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
+  // Dacă ești deja logat, pagina de login nu are ce să-ți arate — te duce la cont.
+  fetch('/api/me.php', { credentials: 'same-origin' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((me) => {
+      if (me && me.auth) window.location.replace('/cont/');
+    })
+    .catch(() => {});
+
   const MSG: Record<string, [string, boolean]> = {
     'ok=confirmare': ['Aproape gata! Ți-am trimis un email de activare — dă click pe linkul din el (verifică și spamul).', false],
     'ok=activat': ['Contul e activat! Te poți autentifica.', false],
