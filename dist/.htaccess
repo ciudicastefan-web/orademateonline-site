@@ -1,0 +1,13 @@
+# Ora de Mate Online — reguli servite de LiteSpeed (Astro copiază public/ în dist/)
+
+# 1) Orice cerere http e împinsă permanent (301) către https —
+#    dublăm regula din panoul Hostico ca să nu depindem de setările lui.
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# 2) HSTS: după prima vizită pe https, browserul refuză singur http
+#    pentru acest domeniu timp de un an — inclusiv din cache sau bookmarkuri vechi.
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+</IfModule>
