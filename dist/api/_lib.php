@@ -33,9 +33,22 @@ function session_boot(): void
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
+
+    // Sesiunile trăiesc 30 de zile, într-un folder PRIVAT al contului (în afara
+    // public_html și a folderului comun al serverului, unde GC-ul altora le-ar șterge).
+    $lifetime = 60 * 60 * 24 * 30;
+    $dir = dirname(__DIR__, 2) . '/php_sessions';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0700, true);
+    }
+    if (is_dir($dir) && is_writable($dir)) {
+        session_save_path($dir);
+    }
+    ini_set('session.gc_maxlifetime', (string) $lifetime);
+
     session_name('omo_sess');
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => $lifetime,
         'path' => '/',
         'secure' => true,
         'httponly' => true,

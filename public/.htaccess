@@ -6,6 +6,11 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
+# 1b) www → fără www (canonic). Fără asta, cookie-ul de sesiune de pe
+#     orademateonline.ro nu se vede pe www. și utilizatorul pare delogat.
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
 # 2) HSTS: după prima vizită pe https, browserul refuză singur http
 #    pentru acest domeniu timp de un an — inclusiv din cache sau bookmarkuri vechi.
 <IfModule mod_headers.c>
