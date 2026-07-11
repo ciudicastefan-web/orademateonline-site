@@ -11,6 +11,14 @@ if (!$u) {
 }
 $pdo = db();
 
+// eticheta din antet: prenumele (primul cuvânt din numele afișat) sau,
+// dacă lipsește, începutul adresei de email — niciodată emailul întreg
+$who = trim((string) $u['full_name']);
+$who = $who !== '' ? (string) preg_split('/\s+/', $who)[0] : (string) explode('@', (string) $u['email'])[0];
+if (mb_strlen($who) > 12) {
+    $who = mb_substr($who, 0, 12) . '…';
+}
+
 $st = $pdo->prepare('SELECT * FROM children WHERE user_id = ? ORDER BY id');
 $st->execute([$u['id']]);
 $children = $st->fetchAll();
@@ -122,6 +130,7 @@ foreach ($map as $k => $m) {
     nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     nav a{padding:8px 14px;border-radius:999px;font-size:.95rem;font-weight:700;color:var(--ink-soft);text-decoration:none}
     nav a:hover{color:var(--ink);background:rgba(43,74,139,.07)}
+    .me{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:rgba(43,74,139,.08);font-weight:700;font-size:.9rem;color:var(--ink);cursor:default;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     main{width:min(1020px,94vw);padding:clamp(28px,5vh,48px) 16px 40px;flex:1;position:relative;z-index:2}
     .kicker{font-size:.9rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--pen)}
     h1{margin-top:10px;font-family:Georgia,serif;font-size:clamp(1.6rem,4.5vw,2.4rem)}
@@ -161,11 +170,13 @@ foreach ($map as $k => $m) {
     <nav>
       <a href="/">Acasă</a>
       <a href="/cursuri">Cursuri</a>
+      <a href="/materiale">Materiale</a>
       <?php if (is_admin($u)): ?>
         <a href="/admin/" style="background:var(--pen);color:var(--paper)">⚙ Admin</a>
       <?php endif; ?>
+      <span class="me" title="Ești conectat ca <?= e($u['email']) ?>">👤 <?= e($who) ?></span>
       <form method="post" action="/api/logout.php" style="display:inline">
-        <button type="submit" class="ghost">Ieși din cont</button>
+        <button type="submit" class="ghost" title="Ieși din cont">Ieși</button>
       </form>
     </nav>
     </div>
