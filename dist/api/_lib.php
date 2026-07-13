@@ -184,6 +184,20 @@ function price_label(int $cents): string
     return number_format($cents / 100, 2, ',', '.') . ' lei';
 }
 
+/** Notificare de activitate către toți adminii (ADMIN_EMAILS): utilizator nou,
+ *  înscriere, anulare, cont șters. Eșecul trimiterii nu blochează acțiunea. */
+function notify_admins(string $subject, string $body): void
+{
+    if (!defined('ADMIN_EMAILS')) {
+        return;
+    }
+    foreach (array_map('trim', explode(',', ADMIN_EMAILS)) as $adminEmail) {
+        if ($adminEmail !== '') {
+            send_app_mail($adminEmail, $subject, $body);
+        }
+    }
+}
+
 /** Adminii se definesc prin ADMIN_EMAILS în app_config.php (listă separată prin virgulă). */
 function is_admin(array $u): bool
 {

@@ -65,7 +65,7 @@ if ($childId > 0) {
     $pdo->prepare('INSERT INTO children (user_id, first_name, grade, school) VALUES (?, ?, ?, ?)')
         ->execute([$u['id'], $newChildName, $newGrade, $newChildSchool !== '' ? $newChildSchool : null]);
     $childId = (int) $pdo->lastInsertId();
-    $child = ['id' => $childId, 'grade' => $newGrade];
+    $child = ['id' => $childId, 'first_name' => $newChildName, 'grade' => $newGrade];
 } else {
     redirect($back . '?err=programare');
 }
@@ -103,8 +103,10 @@ if ($existing) {
         ->execute([$sessionId, $childId, $u['id'], $paidAt]);
 }
 
+$when = date('d.m.Y, H:i', strtotime((string) $sess['starts_at']));
+$childName = (string) ($child['first_name'] ?? 'elevul');
+
 if ($price > 0) {
-    $when = date('d.m.Y, H:i', strtotime((string) $sess['starts_at']));
     send_app_mail(
         (string) $u['email'],
         'Loc rezervat — ' . $sess['title'],
@@ -113,20 +115,18 @@ if ($price > 0) {
         . "Te contactăm în scurt timp cu detaliile de plată; după confirmare, "
         . "linkul de conectare apare în contul tău.\n\n" . BASE_URL . '/cont/'
     );
-    if (defined('ADMIN_EMAILS')) {
-        foreach (array_map('trim', explode(',', ADMIN_EMAILS)) as $adminEmail) {
-            if ($adminEmail !== '') {
-                send_app_mail(
-                    $adminEmail,
-                    'Rezervare de încasat — ' . $sess['title'],
-                    "{$u['full_name']} ({$u['email']}) a rezervat un loc la „{$sess['title']}” din {$when} — "
-                    . price_label($price) . ".\n\nDupă ce încasezi banii, confirmă plata de aici:\n"
-                    . BASE_URL . '/admin/ora.php?id=' . $sessionId
-                );
-            }
-        }
-    }
+    notify_admins(
+        'Rezervare de încasat — ' . $sess['title'],
+        "{$u['full_name']} ({$u['email']}) l-a înscris pe {$childName} la „{$sess['title']}” din {$when} — "
+        . price_label($price) . ".\n\nDupă ce încasezi banii, confirmă plata de aici:\n"
+        . BASE_URL . '/admin/ora.php?id=' . $sessionId
+    );
     redirect($back . '?ok=programat-plata');
 }
 
+notify_admins(
+    'Înscriere nouă — ' . $sess['title'],
+    "{$u['full_name']} ({$u['email']}) l-a înscris pe {$childName} la „{$sess['title']}” din {$when} (oră gratuită).\n\n"
+    . 'Pagina orei: ' . BASE_URL . '/admin/ora.php?id=' . $sessionId
+);
 redirect($back . '?ok=programat');

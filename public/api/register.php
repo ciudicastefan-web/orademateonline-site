@@ -58,6 +58,14 @@ if ($existing) {
                    VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))')
         ->execute([$email, password_hash($pass, PASSWORD_DEFAULT), $name, $optin, $tokenHash]);
     $uid = (int) $pdo->lastInsertId();
+
+    notify_admins(
+        'Utilizator nou — ' . $name,
+        "{$name} ({$email}) și-a făcut cont pe orademateonline.ro.\n"
+        . 'Abonat la noutăți: ' . ($optin === 1 ? 'da' : 'nu') . "\n"
+        . "Contul așteaptă activarea prin email.\n\n"
+        . 'Panoul de admin: ' . BASE_URL . '/admin/'
+    );
 }
 
 $next = sanitize_next($_POST['next'] ?? null);
