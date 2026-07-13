@@ -5,9 +5,24 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
-  title="Ora de Mate Online — meditații de matematică în grupe mici"
+  title="Meditații de matematică online în grupe mici — Ora de Mate Online"
   description="Meditații de matematică online, în grupe mici, pentru elevi: ore live, materiale de lucru și test gratuit de evaluare. Lansăm în curând."
 >
+  <!-- Schema Organization: îi spune lui Google cine e entitatea din spatele site-ului. -->
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'EducationalOrganization',
+      name: 'Ora de Mate Online',
+      url: 'https://orademateonline.ro',
+      logo: 'https://orademateonline.ro/favicon.svg',
+      description:
+        'Meditații de matematică online în grupe mici, pe clase, plus materiale digitale de lucru: teste rezolvate, teorie pe scurt, pregătire pentru Evaluarea Națională și Bacalaureat.',
+      areaServed: 'RO',
+      knowsAbout: ['matematică', 'meditații online', 'Evaluarea Națională', 'Bacalaureat'],
+    })}
+  />
   <div class="doodles" aria-hidden="true">
     <span class="doodle d1">π</span>
     <span class="doodle d2">√x</span>

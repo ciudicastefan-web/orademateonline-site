@@ -60,6 +60,20 @@ const faqs = [
   title="Întrebări frecvente — Ora de Mate Online"
   description="Răspunsuri la întrebările părinților și ale elevilor: cum se țin orele online, câți elevi sunt în grupă, cum funcționează plățile și materialele."
 >
+  <!-- Schema FAQPage: generată din același array ca pagina — Google poate afișa
+       întrebările expandabile direct în rezultatele căutării. -->
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    })}
+  />
   <main>
     <p class="kicker reveal" style="--i: 0">Întrebări frecvente</p>
     <h1 class="reveal" style="--i: 1">Tot ce vor părinții — și elevii — să știe</h1>
