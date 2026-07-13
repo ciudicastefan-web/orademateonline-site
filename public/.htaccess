@@ -3,6 +3,9 @@
 # Adresele inexistente primesc pagina noastră 404 (nu eroarea seacă a serverului)
 ErrorDocument 404 /404.html
 
+# Nimeni nu are ce căuta în listarea directoarelor
+Options -Indexes
+
 # 1) Orice cerere http e împinsă permanent (301) către https —
 #    dublăm regula din panoul Hostico ca să nu depindem de setările lui.
 RewriteEngine On
@@ -18,6 +21,20 @@ RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 #    pentru acest domeniu timp de un an — inclusiv din cache sau bookmarkuri vechi.
 <IfModule mod_headers.c>
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+
+  # 2b) Headere de securitate pentru browser:
+  #  - CSP: scripturile/stilurile/imaginile pot veni DOAR de pe domeniul nostru;
+  #    formularele pot trimite DOAR către noi; site-ul nu poate fi pus în iframe.
+  #    ('unsafe-inline' e necesar pentru stilurile inline și confirm()-urile din admin.)
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  #  - browserul nu „ghicește" tipul fișierelor (blochează trucuri cu extensii false)
+  Header always set X-Content-Type-Options "nosniff"
+  #  - site-ul nu poate fi încadrat în iframe pe alte site-uri (anti-clickjacking)
+  Header always set X-Frame-Options "DENY"
+  #  - linkurile externe nu primesc adresa completă a paginii de unde pleci
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  #  - site-ul declară că nu folosește cameră/microfon/locație (Meet rulează pe domeniul Google)
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 
   # 3) Cache lung pentru asseturile generate de build: numele lor conțin un hash
   #    care se schimbă la fiecare modificare, deci conținutul de sub un nume dat
