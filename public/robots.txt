@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Disallow: /cont/
+Disallow: /autentificare
+Disallow: /inregistrare
+Disallow: /resetare
+
+Sitemap: https://orademateonline.ro/sitemap-index.xml
