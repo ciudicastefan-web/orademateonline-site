@@ -6,6 +6,14 @@ import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import MathBackground from '../components/MathBackground.astro';
 
+// fișierele de font critice, cu URL-ul lor final (hashuit) — le anunțăm în <head>
+// ca browserul să le descarce imediat, nu abia după ce parsează CSS-ul.
+// latin-ext e obligatoriu: acolo stau diacriticele românești (ă, ș, ț).
+import frauncesLatin from '@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url';
+import frauncesLatinExt from '@fontsource-variable/fraunces/files/fraunces-latin-ext-wght-normal.woff2?url';
+import atkinsonLatin from '@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2?url';
+import atkinsonLatinExt from '@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-ext-400-normal.woff2?url';
+
 interface Props {
   title: string;
   description: string;
@@ -36,6 +44,10 @@ const nav = [
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="google-site-verification" content="jRms8YPtPIhDMbXW0wzItAjCg3-O1MIqaO54kAr2cZk" />
+    <link rel="preload" href={frauncesLatinExt} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={atkinsonLatinExt} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={atkinsonLatin} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -60,11 +72,15 @@ const nav = [
       </a>
       <nav aria-label="Navigare principală">
         {nav.map((item) => (
-          <a href={item.href} aria-current={path === item.href.replace(/\/$/, '') || (item.href === '/' && path === '/') ? 'page' : undefined}>
+          <a
+            href={item.href}
+            data-astro-prefetch={item.href === '/cont/' ? 'false' : undefined}
+            aria-current={path === item.href.replace(/\/$/, '') || (item.href === '/' && path === '/') ? 'page' : undefined}
+          >
             {item.label}
           </a>
         ))}
-        <a href="/admin/" id="admin-link" class="admin-link" hidden>⚙ Admin</a>
+        <a href="/admin/" id="admin-link" class="admin-link" data-astro-prefetch="false" hidden>⚙ Admin</a>
       </nav>
       </div>
     </header>

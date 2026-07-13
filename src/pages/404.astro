@@ -1,0 +1,76 @@
+---
+// Pagina 404 — o „problemă fără soluție” în stilul caietului, cu drumuri înapoi.
+// Serverele o servesc automat pentru orice adresă inexistentă (Apache/LiteSpeed
+// caută /404.html — vezi ErrorDocument din .htaccess).
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Pagina nu există — Ora de Mate Online"
+  description="Pagina căutată nu există. Înapoi la meditațiile de matematică online."
+  noindex={true}
+>
+  <main>
+    <p class="kicker reveal" style="--i: 0">Eroare 404</p>
+    <h1 class="reveal" style="--i: 1">Hmm… problema asta nu are soluție.</h1>
+    <p class="lead reveal" style="--i: 2">
+      Pagina pe care o cauți nu există — poate linkul e vechi sau s-a strecurat
+      o literă greșită. Se întâmplă și la cei mai buni elevi. ✏️
+    </p>
+
+    <div class="paths reveal" style="--i: 3">
+      <a class="path" href="/">🏠 Înapoi la prima pagină</a>
+      <a class="path" href="/cursuri">📅 Vezi cursurile și calendarul orelor</a>
+      <a class="path" href="/materiale">📚 Răsfoiește materialele digitale</a>
+      <a class="path" href="/intrebari-frecvente">❓ Întrebări frecvente</a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+
+  h1 {
+    margin-top: 10px;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+  }
+
+  .lead {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .paths {
+    margin-top: clamp(28px, 5vh, 44px);
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  .path {
+    display: block;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid rgba(43, 74, 139, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(29, 46, 82, 0.05);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .path:hover {
+    border-color: var(--pen);
+    transform: translateX(4px);
+  }
+</style>
